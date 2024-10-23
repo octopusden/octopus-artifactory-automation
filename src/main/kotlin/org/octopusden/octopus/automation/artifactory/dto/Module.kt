@@ -1,4 +1,11 @@
 package org.octopusden.octopus.automation.artifactory.dto
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonProperty
+
 @Suppress("unused")
-class Module(val id: String, val type: String?, val artifacts: Collection<Artifact>)
+class Module @JsonCreator constructor(
+    @JsonProperty("id") val id: String,
+    @JsonProperty("type") val type: String?,
+    @JsonProperty("artifacts") val artifacts: Collection<Artifact>
+)

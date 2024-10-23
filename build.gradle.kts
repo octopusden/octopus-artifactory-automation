@@ -1,11 +1,14 @@
+import com.avast.gradle.dockercompose.ComposeExtension
 import java.time.Duration
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.octopusden.octopus.task.ConfigureMockServer
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
     application
     id("com.github.johnrengelman.shadow")
+    id("com.avast.gradle.docker-compose")
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin")
     signing
@@ -28,11 +31,32 @@ repositories {
 }
 
 tasks.withType<Test> {
+    dependsOn("configureMockServer")
     useJUnitPlatform()
     testLogging {
         info.events = setOf(TestLogEvent.FAILED, TestLogEvent.PASSED, TestLogEvent.SKIPPED)
     }
     systemProperties["jar"] = configurations["shadow"].artifacts.files.asPath
+}
+
+configure<ComposeExtension> {
+    useComposeFiles.add(layout.projectDirectory.file("docker/docker-compose.yml").asFile.path)
+    waitForTcpPorts.set(true)
+    captureContainersOutputToFiles.set(layout.buildDirectory.dir("docker-logs"))
+    environment.putAll(
+        mapOf(
+            "DOCKER_REGISTRY" to properties["docker.registry"],
+            "MOCK_SERVER_VERSION" to properties["mock-server.version"],
+        )
+    )
+}
+
+tasks {
+    val configureMockServer by registering(ConfigureMockServer::class)
+}
+
+tasks.named("configureMockServer") {
+    dependsOn("composeUp")
 }
 
 dependencies {
@@ -41,14 +65,16 @@ dependencies {
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
 
     implementation("org.jfrog.artifactory.client:artifactory-java-client-services:${properties["artifactory-client.version"]}")
-    //ToDo dependency related to artifactory-java-client-services and must be transitive
+    //ToDo dependencies related to artifactory-java-client-services and must be transitive
     implementation("org.apache.groovy:groovy:4.0.23")
-    //ToDo dependency related to artifactory-java-client-services and must be transitive
     implementation("org.apache.httpcomponents:httpcore:4.4.13")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.14.2")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${properties["junit.version"]}")
     testImplementation("org.junit.jupiter:junit-jupiter-params:${properties["junit.version"]}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${properties["junit.version"]}")
+    testImplementation("it.skrape:skrapeit:1.2.2")
+    testImplementation("org.mock-server:mockserver-client-java:${properties["mock-server.version"]}")
 }
 
 application {

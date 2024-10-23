@@ -1,0 +1,12 @@
+{
+  "version" : "7.71.23",
+  "revision" : "77123900",
+  "addons" : [ "build", "docker", "helmoci", "oci", "packages-archive", "vagrant", "replication", "filestore", "curation", "plugins", "worker", "gems", "composer", "npm", "bower", "git-lfs", "nuget", "debian", "opkg", "rpm", "cocoapods", "conan", "vcs", "pypi", "release-bundle", "jf-connect", "jf-event", "replicator", "keys", "alpine", "analytics", "cargo", "chef", "federated", "git", "observability", "onboarding", "pub", "rest", "swift", "lead-artifact-detector", "conda", "terraform", "tracker", "license", "puppet", "ldap", "sso", "layouts", "properties", "search", "securityresourceaddon", "filtered-resources", "p2", "watch", "webstart", "support", "xray", "retention" ],
+  "license" : "bd93b6c4e05c86fec431f74cc1dc94b91f84abed2",
+  "entitlements" : {
+    "EVENT_BASED_PULL_REPLICATION" : false,
+    "SMART_REMOTE_TARGET_FOR_EDGE" : false,
+    "REPO_REPLICATION" : true,
+    "MULTIPUSH_REPLICATION" : false
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "existed-build-name": {
+    "existed-build-number1": {
+      "buildInfo": {
+        "version": "1.0.1",
+        "name": "existed-build-name",
+        "number": "existed-build-number1",
+        "buildAgent": {
+          "name": "Maven",
+          "version": "3.6.0"
+        },
+        "agent": {
+          "name": "artifactory-maven-plugin",
+          "version": "3.2.1"
+        },
+        "started": "2024-10-19T15:07:54.915+0300",
+        "durationMillis": 276272,
+        "artifactoryPrincipal": "tcagent",
+        "vcs": [],
+        "modules": [
+          {
+            "properties": {
+            },
+            "id": "org.octopusden.octopus.automation.artifactory:octopus-artifactory-automation:existed-build-number1",
+            "artifacts": [
+              {
+                "type": "jar",
+                "sha1": "b9f3c4256bd04842e7e906c430b5fdf0d46750a6",
+                "sha256": "05065e8a9b6b2006492c69e74996491d08b536c7d5980eec823c864f0aab60b8",
+                "md5": "7f71b32a41891e548840ace56f112b49",
+                "name": "octopus-artifactory-automation-existed-build-number1.jar"
+              }
+            ],
+            "dependencies": []
+          }
+        ]
+      },
+      "uri": "https://localhost:1080:443/artifactory/api/build/existed-build-name/existed-build-number1?buildRepo=artifactory-build-info"
+    }
+  }
+}

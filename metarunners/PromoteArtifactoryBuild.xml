@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Promote Artifactory Build">
+    <description>Promote Artifactory Build</description>
+    <settings>
+        <parameters>
+            <param name="ARTIFACTORY_BUILD_NAME" value="%ARTIFACTORY_BUILD_NAME%"
+                   spec="text description='Artifactory Build Name to promote.' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_BUILD_NUMBER" value="%BUILD_VERSION%"
+                   spec="text description='Artifactory Build Number to promote.' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_TARGET_STATUS" value="release"
+                   spec="text description='Artifactory status to promote build to.' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_TARGET_REPOSITORY" value=""
+                   spec="text description='Artifactory repository to promote build to.' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_IGNORE_NOT_FOUND" value="true"
+                   spec="checkbox description='Exit silently if build is not found' uncheckedValue='false' checkedValue='true' display='normal'" />
+            <param name="ARTIFACTORY_FORCE_PROMOTE" value="false"
+                   spec="checkbox description='Do promotion whether or not build has target status assigned already' uncheckedValue='false' checkedValue='true' display='normal'" />
+        </parameters>
+        <build-runners>
+            <runner name="promote build" type="OctopusTeamcityAutomation">
+                <parameters>
+                    <param name="ARGS"
+                           value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-build --build-name=%ARTIFACTORY_BUILD_NAME% --build-number=%ARTIFACTORY_BUILD_NUMBER% --target-repository=%ARTIFACTORY_TARGET_REPOSITORY% --target-status=%ARTIFACTORY_TARGET_STATUS% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND% --force=%ARTIFACTORY_FORCE_PROMOTE%"/>
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements/>
+    </settings>
+</meta-runner>

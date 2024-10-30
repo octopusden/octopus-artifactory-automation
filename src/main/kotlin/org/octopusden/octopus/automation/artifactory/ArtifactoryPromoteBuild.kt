@@ -7,14 +7,9 @@ import com.github.ajalt.clikt.parameters.options.convert
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import org.apache.http.HttpStatus
-import org.jfrog.artifactory.client.Artifactory
-import org.jfrog.artifactory.client.ArtifactoryRequest
-import org.jfrog.artifactory.client.ArtifactoryResponse
-import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl
-import org.octopusden.octopus.automation.artifactory.dto.BuildInfo
-import org.octopusden.octopus.automation.artifactory.dto.BuildInfoResponse
-import org.octopusden.octopus.automation.artifactory.dto.Promote
+import org.octopusden.octopus.infrastructure.artifactory.client.ArtifactoryClient
+import org.octopusden.octopus.infrastructure.artifactory.client.dto.BuildInfo
+import org.octopusden.octopus.infrastructure.artifactory.client.dto.PromoteBuildRequest
 import org.slf4j.Logger
 
 class ArtifactoryPromoteBuild : CliktCommand(name = COMMAND) {
@@ -42,8 +37,9 @@ class ArtifactoryPromoteBuild : CliktCommand(name = COMMAND) {
     private val force by option(FORCE, help = "Force promotion").convert { it.trim().toBoolean() }
         .default(false)
 
-    private val client by lazy { context[ArtifactoryCommand.CLIENT] as Artifactory }
+    private val client by lazy { context[ArtifactoryCommand.CLIENT] as ArtifactoryClient }
     private val log by lazy { context[ArtifactoryCommand.LOG] as Logger }
+    private val username by lazy { context[ArtifactoryCommand.USERNAME] as String }
 
     override fun run() {
         log.info("Promote Artifactory build: '$buildName:$buildNumber', to repository: '$targetRepository', target status: '$targetStatus'")
@@ -57,48 +53,27 @@ class ArtifactoryPromoteBuild : CliktCommand(name = COMMAND) {
     }
 
     private fun getBuildInfo(buildName: String, buildNumber: String): BuildInfo? {
-        val buildRequest = ArtifactoryRequestImpl()
-            .apiUrl("api/build/$buildName/$buildNumber")
-            .method(ArtifactoryRequest.Method.GET)
-            .responseType(ArtifactoryRequest.ContentType.JSON)
-
-        val successCodes = with(intArrayOf(HttpStatus.SC_OK)) {
-            if (ignoreNotFound) {
-                plus(HttpStatus.SC_NOT_FOUND)
-            } else {
-                this
-            }
-        }
-
-        return client.restCall(buildRequest).check(*successCodes)
-            .takeIf { response -> response.statusLine.statusCode == HttpStatus.SC_OK }
-            ?.parseBody(BuildInfoResponse::class.java)?.buildInfo
-            ?.also { buildInfo ->
+        return Util.handleNotFoundException(ignoreNotFound) {
+            client.getBuildInfo(buildName, buildNumber).buildInfo.also { buildInfo ->
                 if (buildInfo.modules.isNullOrEmpty()) {
-                    log.warn("The build $buildName/$buildNumber found but has no modules. Check creating and publishing build artifacts.")
+                    log.warn("The build $buildName:$buildNumber found but has no modules. Check creating and publishing build artifacts.")
                 }
             }
+        }
     }
 
     private fun promote(buildInfo: BuildInfo, targetRepository: String, targetStatus: String, forcePromote: Boolean) {
         if (forcePromote || (buildInfo.statuses?.find { it.status == targetStatus } == null)) {
-            val promote = Promote(client.username, targetRepository, targetStatus)
-            val promoteRequest: ArtifactoryRequest = ArtifactoryRequestImpl()
-                .apiUrl("api/build/promote/${buildInfo.name}/${buildInfo.number}")
-                .method(ArtifactoryRequest.Method.POST)
-                .requestType(ArtifactoryRequest.ContentType.JSON)
-                .requestBody(promote)
-            client.restCall(promoteRequest).check(HttpStatus.SC_OK)
+            val promote = PromoteBuildRequest(username, targetRepository, targetStatus)
+            client.promoteBuild(buildInfo.name, buildInfo.number, promote).also {
+                it.messages.joinToString { artifactoryMessage -> artifactoryMessage.message }.let { message ->
+                    log.info("Build $buildName:$buildNumber promoted with message: $message")
+                }
+            }
         } else {
-            log.info("Build $buildInfo already promoted to $targetStatus")
+            log.info("Build $buildName:$buildNumber already promoted to $targetStatus")
         }
     }
-
-    private fun ArtifactoryResponse.check(vararg successCodes: Int): ArtifactoryResponse =
-        takeIf { statusLine.statusCode in successCodes } ?: run {
-            log.error("Status code: {}, body: {}", statusLine.statusCode, rawBody)
-            throw RuntimeException("Fail to promote build")
-        }
 
     companion object {
         const val COMMAND = "promote-build"

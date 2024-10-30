@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Promote Artifactory Docker Image">
+    <description>Promote Artifactory Build</description>
+    <settings>
+        <parameters>
+            <param name="ARTIFACTORY_DOCKER_SOURCE_REPOSITORY" value="%ARTIFACTORY_DOCKER_SOURCE_REPOSITORY%"
+                   spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_DOCKER_TARGET_REPOSITORY" value="%ARTIFACTORY_DOCKER_TARGET_REPOSITORY%"
+                   spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_DOCKER_IMAGE" value="%ARTIFACTORY_DOCKER_IMAGE%"
+                   spec="text description='Artifactory image name promote' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_DOCKER_TAG" value="%ARTIFACTORY_DOCKER_TAG%"
+                   spec="text description='Artifactory image tag promote' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_IGNORE_NOT_FOUND" value="true"
+                   spec="checkbox description='Exit silently if build is not found' uncheckedValue='false' checkedValue='true' display='normal'" />
+        </parameters>
+        <build-runners>
+            <runner name="promote docker image" type="OctopusTeamcityAutomation">
+                <parameters>
+                    <param name="ARGS"
+                           value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-docker-image --source-repository=%ARTIFACTORY_DOCKER_SOURCE_REPOSITORY% --target-repository=%ARTIFACTORY_DOCKER_TARGET_REPOSITORY% --image=%ARTIFACTORY_DOCKER_IMAGE% --tag=%ARTIFACTORY_DOCKER_TAG% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND%"/>
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements/>
+    </settings>
+</meta-runner>

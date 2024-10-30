@@ -63,12 +63,7 @@ dependencies {
     implementation("org.slf4j:slf4j-api:2.0.13")
     implementation("ch.qos.logback:logback-classic:1.3.14")
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
-
-    implementation("org.jfrog.artifactory.client:artifactory-java-client-services:${properties["artifactory-client.version"]}")
-    //ToDo dependencies related to artifactory-java-client-services and must be transitive
-    implementation("org.apache.groovy:groovy:4.0.23")
-    implementation("org.apache.httpcomponents:httpcore:4.4.13")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.14.2")
+    implementation("org.octopusden.octopus.octopus-external-systems-clients:artifactory-client:${properties["artifactory-client.version"]}")
 
     testImplementation("org.junit.jupiter:junit-jupiter-api:${properties["junit.version"]}")
     testImplementation("org.junit.jupiter:junit-jupiter-params:${properties["junit.version"]}")

@@ -8,5 +8,6 @@ repositories {
 
 dependencies {
     implementation(gradleApi())
-    implementation("org.mock-server:mockserver-client-java:5.15.0")
+    implementation("org.mock-server:mockserver-client-java:${properties["mock-server.version"]}")
+    implementation("org.octopusden.octopus.octopus-external-systems-clients:artifactory-client:${properties["artifactory-client.version"]}")
 }

@@ -15,7 +15,7 @@
                    spec="checkbox description='Exit silently if build is not found' uncheckedValue='false' checkedValue='true' display='normal'" />
         </parameters>
         <build-runners>
-            <runner name="promote docker image" type="OctopusTeamcityAutomation">
+            <runner name="promote docker image" type="OctopusArtifactoryAutomation">
                 <parameters>
                     <param name="ARGS"
                            value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-docker-image --source-repository=%ARTIFACTORY_DOCKER_SOURCE_REPOSITORY% --target-repository=%ARTIFACTORY_DOCKER_TARGET_REPOSITORY% --image=%ARTIFACTORY_DOCKER_IMAGE% --tag=%ARTIFACTORY_DOCKER_TAG% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND%"/>

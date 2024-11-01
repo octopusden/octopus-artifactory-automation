@@ -17,7 +17,7 @@
                    spec="checkbox description='Do promotion whether or not build has target status assigned already' uncheckedValue='false' checkedValue='true' display='normal'" />
         </parameters>
         <build-runners>
-            <runner name="promote build" type="OctopusTeamcityAutomation">
+            <runner name="promote build" type="OctopusArtifactoryAutomation">
                 <parameters>
                     <param name="ARGS"
                            value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-build --build-name=%ARTIFACTORY_BUILD_NAME% --build-number=%ARTIFACTORY_BUILD_NUMBER% --target-repository=%ARTIFACTORY_TARGET_REPOSITORY% --target-status=%ARTIFACTORY_TARGET_STATUS% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND% --force=%ARTIFACTORY_FORCE_PROMOTE%"/>

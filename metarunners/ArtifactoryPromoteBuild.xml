@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <meta-runner name="Promote Artifactory Build">
-    <description>Promote Artifactory Build</description>
+    <description>Promote Artifactory build</description>
     <settings>
         <parameters>
             <param name="ARTIFACTORY_BUILD_NAME" value="%ARTIFACTORY_BUILD_NAME%"

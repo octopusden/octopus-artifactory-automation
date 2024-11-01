@@ -1,30 +1,45 @@
-<meta-runner name="Docker Image Publisher to Artifactory Build">
-    <description>Creates and publishes Artifactory build and pushes docker image to it</description>
+<meta-runner name="Push and publish Artifactory Docker Image">
+    <description>Create and publish Artifactory build and push docker image to it</description>
     <settings>
         <parameters>
             <param name="DOCKER_REGISTRY" value="%DOCKER_REGISTRY%" />
-            <param name="ARTIFACTORY_DOCKER_IMAGE" value="%ARTIFACTORY_DOCKER_IMAGE%" />
+            <param name="ARTIFACTORY_DOCKER_IMAGE" value="%DISTRIBUTION_DOCKER_IMAGE_NAME%" />
             <param name="ARTIFACTORY_DOCKER_BUILD_NUMBER" value="%BUILD_VERSION%" />
-            <param name="ARTIFACTORY_DOCKER_SOURCE_REPOSITORY" value="%DOCKER_REPO_DEV%" />
+            <param name="ARTIFACTORY_DOCKER_REPOSITORY" value="%DOCKER_REPO_DEV%" />
             <param name="ARTIFACTORY_DOCKER_BUILD_NAME" value="%ARTIFACTORY_DOCKER_BUILD_NAME%" />
         </parameters>
         <build-runners>
-            <runner name="Push Image(Docker)" type="simpleRunner">
+            <runner name="Push Image (Docker)" type="simpleRunner">
                 <conditions>
-                    <does-not-equal name="ARTIFACTORY_DOCKER_IMAGE" value="" />
+                    <does-not-equal name="DISTRIBUTION_DOCKER_IMAGE_NAME" value="" />
+                    <equals name="container.engine" value="docker" />
                 </conditions>
                 <parameters>
                     <param name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource" value="Job configuration" />
                     <param name="org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource" value="Job configuration" />
                     <param name="org.jfrog.artifactory.selectedDeployableServer.useSpecs" value="false" />
-                    <param name="script.content"><![CDATA[jfrog rt docker-push %DOCKER_REGISTRY%/%ARTIFACTORY_DOCKER_IMAGE%:%ARTIFACTORY_DOCKER_BUILD_NUMBER% %ARTIFACTORY_DOCKER_SOURCE_REPOSITORY% --build-name=%ARTIFACTORY_DOCKER_BUILD_NAME% --build-number=%ARTIFACTORY_DOCKER_BUILD_NUMBER%]]></param>
+                    <param name="script.content"><![CDATA[jfrog rt docker-push %DOCKER_REGISTRY%/%ARTIFACTORY_DOCKER_IMAGE%:%ARTIFACTORY_DOCKER_BUILD_NUMBER% %ARTIFACTORY_DOCKER_REPOSITORY% --build-name=%ARTIFACTORY_DOCKER_BUILD_NAME% --build-number=%ARTIFACTORY_DOCKER_BUILD_NUMBER%]]></param>
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="use.custom.script" value="true" />
+                </parameters>
+            </runner>
+            <runner name="Push Image (Podman)" type="simpleRunner">
+                <conditions>
+                    <does-not-equal name="DISTRIBUTION_DOCKER_IMAGE_NAME" value="" />
+                    <equals name="container.engine" value="podman" />
+                </conditions>
+                <parameters>
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource" value="Job configuration" />
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource" value="Job configuration" />
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.useSpecs" value="false" />
+                    <param name="script.content"><![CDATA[jfrog rt podman-push %DOCKER_REGISTRY%/%ARTIFACTORY_DOCKER_IMAGE%:%ARTIFACTORY_DOCKER_BUILD_NUMBER% %ARTIFACTORY_DOCKER_REPOSITORY% --build-name=%ARTIFACTORY_DOCKER_BUILD_NAME% --build-number=%ARTIFACTORY_DOCKER_BUILD_NUMBER%]]></param>
                     <param name="teamcity.step.mode" value="default" />
                     <param name="use.custom.script" value="true" />
                 </parameters>
             </runner>
             <runner name="Publish Artifactory Build" type="simpleRunner">
                 <conditions>
-                    <does-not-equal name="ARTIFACTORY_DOCKER_IMAGE" value="" />
+                    <does-not-equal name="DISTRIBUTION_DOCKER_IMAGE_NAME" value="" />
                 </conditions>
                 <parameters>
                     <param name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource" value="Job configuration" />

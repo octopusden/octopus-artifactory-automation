@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <meta-runner name="Promote Artifactory Docker Image">
-    <description>Promote Artifactory Build</description>
+    <description>Promote Artifactory Docker image</description>
     <settings>
         <parameters>
-            <param name="ARTIFACTORY_DOCKER_SOURCE_REPOSITORY" value="%ARTIFACTORY_DOCKER_SOURCE_REPOSITORY%"
+            <param name="ARTIFACTORY_DOCKER_SOURCE_REPOSITORY" value="%DOCKER_REPO_SOURCE%"
                    spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
-            <param name="ARTIFACTORY_DOCKER_TARGET_REPOSITORY" value="%ARTIFACTORY_DOCKER_TARGET_REPOSITORY%"
+            <param name="ARTIFACTORY_DOCKER_TARGET_REPOSITORY" value="%DOCKER_REPO_RELEASE%"
                    spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
             <param name="ARTIFACTORY_DOCKER_IMAGE" value="%ARTIFACTORY_DOCKER_IMAGE%"
                    spec="text description='Artifactory image name promote' validationMode='not_empty' display='normal'"/>

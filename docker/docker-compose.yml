@@ -1,0 +1,8 @@
+version: '3'
+
+services:
+  mockserver:
+    container_name: artifactory-mockserver
+    image: ${DOCKER_REGISTRY}/mockserver/mockserver:mockserver-${MOCK_SERVER_VERSION}
+    ports:
+      - "1080:1080"

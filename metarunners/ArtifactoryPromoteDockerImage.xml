@@ -3,13 +3,13 @@
     <description>Promote Artifactory Docker image</description>
     <settings>
         <parameters>
-            <param name="ARTIFACTORY_DOCKER_SOURCE_REPOSITORY" value="%DOCKER_REPO_SOURCE%"
+            <param name="ARTIFACTORY_DOCKER_SOURCE_REPOSITORY" value="%DOCKER_REPO_DEV%"
                    spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
             <param name="ARTIFACTORY_DOCKER_TARGET_REPOSITORY" value="%DOCKER_REPO_RELEASE%"
                    spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
-            <param name="ARTIFACTORY_DOCKER_IMAGE" value="%ARTIFACTORY_DOCKER_IMAGE%"
+            <param name="ARTIFACTORY_DOCKER_IMAGE" value="%DISTRIBUTION_DOCKER_IMAGE_NAME%"
                    spec="text description='Artifactory image name promote' validationMode='not_empty' display='normal'"/>
-            <param name="ARTIFACTORY_DOCKER_TAG" value="%ARTIFACTORY_DOCKER_TAG%"
+            <param name="ARTIFACTORY_DOCKER_TAG" value="%BUILD_VERSION%"
                    spec="text description='Artifactory image tag promote' validationMode='not_empty' display='normal'"/>
             <param name="ARTIFACTORY_IGNORE_NOT_FOUND" value="true"
                    spec="checkbox description='Exit silently if build is not found' uncheckedValue='false' checkedValue='true' display='normal'" />

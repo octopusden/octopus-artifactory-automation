@@ -6,7 +6,7 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import org.octopusden.octopus.automation.artifactory.ArtifactoryCommand
 import org.octopusden.octopus.automation.artifactory.ArtifactoryPromoteBuild
-import org.octopusden.octopus.automation.artifactory.ArtifactoryPromoteDockerImage
+import org.octopusden.octopus.automation.artifactory.ArtifactoryPromoteDockerImages
 
 
 class ApplicationTest {
@@ -80,55 +80,55 @@ class ApplicationTest {
                 )
             ),
             Arguments.of(
-                "Test promote-docker-image help", 0, arrayOf(ArtifactoryPromoteDockerImage.COMMAND, HELP_OPTION)
+                "Test promote-docker-images help", 0, arrayOf(ArtifactoryPromoteDockerImages.COMMAND, HELP_OPTION)
             ),
             Arguments.of(
-                "Test promote-docker-image", 0, arrayOf(
-                    ArtifactoryPromoteDockerImage.COMMAND,
-                    "${ArtifactoryPromoteDockerImage.SOURCE_REPOSITORY}=docker-dev-repository",
-                    "${ArtifactoryPromoteDockerImage.TARGET_REPOSITORY}=docker-release-repository",
-                    "${ArtifactoryPromoteDockerImage.IMAGE}=docker.example.com/existed-image",
-                    "${ArtifactoryPromoteDockerImage.TAG}=existed-tag"
+                "Test promote-docker-images", 0, arrayOf(
+                    ArtifactoryPromoteDockerImages.COMMAND,
+                    "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=docker-dev-repository",
+                    "${ArtifactoryPromoteDockerImages.TARGET_REPOSITORY}=docker-release-repository",
+                    "${ArtifactoryPromoteDockerImages.IMAGES}=existed-image:existed-tag"
                 )
             ),
             Arguments.of(
-                "Test promote-docker-image with not existed source docker repository", 1, arrayOf(
-                    ArtifactoryPromoteDockerImage.COMMAND,
-                    "${ArtifactoryPromoteDockerImage.SOURCE_REPOSITORY}=not-existed-docker-dev-repository",
-                    "${ArtifactoryPromoteDockerImage.TARGET_REPOSITORY}=docker-release-repository",
-                    "${ArtifactoryPromoteDockerImage.IMAGE}=docker.example.com/existed-image",
-                    "${ArtifactoryPromoteDockerImage.TAG}=existed-tag",
-                    "${ArtifactoryPromoteDockerImage.IGNORE_NOT_FOUND}=false"
+                "Test promote-docker-images with not existed source docker repository", 1, arrayOf(
+                    ArtifactoryPromoteDockerImages.COMMAND,
+                    "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=not-existed-docker-dev-repository",
+                    "${ArtifactoryPromoteDockerImages.TARGET_REPOSITORY}=docker-release-repository",
+                    "${ArtifactoryPromoteDockerImages.IMAGES}=existed-image:existed-tag"
                 )
             ),
             Arguments.of(
-                "Test promote-docker-image with not existed target docker repository", 1, arrayOf(
-                    ArtifactoryPromoteDockerImage.COMMAND,
-                    "${ArtifactoryPromoteDockerImage.SOURCE_REPOSITORY}=docker-dev-repository",
-                    "${ArtifactoryPromoteDockerImage.TARGET_REPOSITORY}=not-existed-docker-release-repository",
-                    "${ArtifactoryPromoteDockerImage.IMAGE}=docker.example.com/existed-image",
-                    "${ArtifactoryPromoteDockerImage.TAG}=existed-tag",
-                    "${ArtifactoryPromoteDockerImage.IGNORE_NOT_FOUND}=false"
+                "Test promote-docker-images with not existed target docker repository", 1, arrayOf(
+                    ArtifactoryPromoteDockerImages.COMMAND,
+                    "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=docker-dev-repository",
+                    "${ArtifactoryPromoteDockerImages.TARGET_REPOSITORY}=not-existed-docker-release-repository",
+                    "${ArtifactoryPromoteDockerImages.IMAGES}=existed-image:existed-tag"
                 )
             ),
             Arguments.of(
-                "Test promote-docker-image with not existed docker image", 1, arrayOf(
-                    ArtifactoryPromoteDockerImage.COMMAND,
-                    "${ArtifactoryPromoteDockerImage.SOURCE_REPOSITORY}=docker-dev-repository",
-                    "${ArtifactoryPromoteDockerImage.TARGET_REPOSITORY}=docker-release-repository",
-                    "${ArtifactoryPromoteDockerImage.IMAGE}=docker.example.com/not-existed-image",
-                    "${ArtifactoryPromoteDockerImage.TAG}=existed-tag",
-                    "${ArtifactoryPromoteDockerImage.IGNORE_NOT_FOUND}=false"
+                "Test promote-docker-images with not existed docker image", 1, arrayOf(
+                    ArtifactoryPromoteDockerImages.COMMAND,
+                    "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=docker-dev-repository",
+                    "${ArtifactoryPromoteDockerImages.TARGET_REPOSITORY}=docker-release-repository",
+                    "${ArtifactoryPromoteDockerImages.IMAGES}=not-existed-image:existed-tag"
                 )
             ),
             Arguments.of(
-                "Test promote-docker-image with not existed docker image with ignore-not-found", 0, arrayOf(
-                    ArtifactoryPromoteDockerImage.COMMAND,
-                    "${ArtifactoryPromoteDockerImage.SOURCE_REPOSITORY}=docker-dev-repository",
-                    "${ArtifactoryPromoteDockerImage.TARGET_REPOSITORY}=docker-release-repository",
-                    "${ArtifactoryPromoteDockerImage.IMAGE}=docker.example.com/not-existed-image",
-                    "${ArtifactoryPromoteDockerImage.TAG}=existed-tag",
-                    "${ArtifactoryPromoteDockerImage.IGNORE_NOT_FOUND}=true"
+                "Test promote-docker-images with not existed docker image with ignore-not-found", 0, arrayOf(
+                    ArtifactoryPromoteDockerImages.COMMAND,
+                    "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=docker-dev-repository",
+                    "${ArtifactoryPromoteDockerImages.TARGET_REPOSITORY}=docker-release-repository",
+                    "${ArtifactoryPromoteDockerImages.IMAGES}=not-existed-image:existed-tag,existed-image:existed-tag",
+                    "${ArtifactoryPromoteDockerImages.IGNORE_NOT_FOUND}=true"
+                )
+            ),
+            Arguments.of(
+                "Test promote-docker-images with invalid format image coordinates", 0, arrayOf(
+                    ArtifactoryPromoteDockerImages.COMMAND,
+                    "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=docker-dev-repository",
+                    "${ArtifactoryPromoteDockerImages.TARGET_REPOSITORY}=docker-release-repository",
+                    "${ArtifactoryPromoteDockerImages.IMAGES}=invalid-format-image-coordinates,existed-image:existed-tag"
                 )
             )
         )

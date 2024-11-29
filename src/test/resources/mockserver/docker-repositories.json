@@ -1,6 +1,6 @@
 {
   "docker-dev-repository" : {
-    "docker.example.com/existed-image": {
+    "existed-image": {
       "existed-tag" : "docker-release-repository"
     }
   }

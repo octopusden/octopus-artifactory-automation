@@ -26,7 +26,7 @@ class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
         IMAGES, help = "Docker images coordinates in PATH:TAG format (separated by comma/semicolon)"
     ).convert { imagesValue ->
         imagesValue.split(SPLIT_SYMBOLS.toRegex()).map { it.trim() }.filter { it.isNotEmpty() }.toSet()
-    }.default(emptySet())
+    }.required()
 
     private val ignoreNotFound by option(IGNORE_NOT_FOUND, help = "Ignore errors when image is not found")
         .convert { it.trim().toBoolean() }.default(false)

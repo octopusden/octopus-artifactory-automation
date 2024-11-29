@@ -11,7 +11,7 @@ import org.octopusden.octopus.infrastructure.artifactory.client.ArtifactoryClien
 import org.octopusden.octopus.infrastructure.artifactory.client.dto.PromoteDockerImageRequest
 import org.slf4j.Logger
 
-class ArtifactoryPromoteDockerImage : CliktCommand(name = COMMAND) {
+class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
     private val context by requireObject<MutableMap<String, Any>>()
 
     private val sourceRepository by option(SOURCE_REPOSITORY, help = "Source Artifactory docker repository key")
@@ -22,40 +22,42 @@ class ArtifactoryPromoteDockerImage : CliktCommand(name = COMMAND) {
         .convert { it.trim() }.required()
         .check("$TARGET_REPOSITORY is empty") { it.isNotEmpty() }
 
-    private val image by option(IMAGE, help = "Docker image")
-        .convert { it.trim() }.required()
-        .check("$IMAGE is empty") { it.isNotEmpty() }
+    private val images by option(
+        IMAGES, help = "Docker images coordinates in PATH:TAG format (separated by comma/semicolon)"
+    ).convert { imagesValue ->
+        imagesValue.split(SPLIT_SYMBOLS.toRegex()).map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+    }.required()
 
-    private val tag by option(TAG, help = "Artifactory build version")
-        .convert { it.trim() }.required()
-        .check("$TAG is empty") { it.isNotEmpty() }
-
-    private val ignoreNotFound by option(IGNORE_NOT_FOUND, help = "Ignore errors when build is not found")
+    private val ignoreNotFound by option(IGNORE_NOT_FOUND, help = "Ignore errors when image is not found")
         .convert { it.trim().toBoolean() }.default(false)
 
     private val client by lazy { context[ArtifactoryCommand.CLIENT] as ArtifactoryClient }
     private val log by lazy { context[ArtifactoryCommand.LOG] as Logger }
 
     override fun run() {
-        log.info("Promote Docker image: '$image:$tag' to repository: '$targetRepository'")
-        promoteDockerImage()
+        images.forEach { promoteDockerImage(it) }
     }
 
-    private fun promoteDockerImage() {
+    private fun promoteDockerImage(image: String) {
+        log.info("Promote docker image '$image' from '$sourceRepository' to '$targetRepository' repository")
+        val coordinates = image.split(':').filter { it.isNotEmpty() }
+        if (coordinates.size != 2) {
+            log.warn("Image coordinates '$image' has invalid format. Skip promotion")
+            return
+        }
         Util.handleNotFoundException(ignoreNotFound) {
             client.promoteDockerImage(
                 sourceRepository,
-                PromoteDockerImageRequest(image, tag, targetRepository)
+                PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository)
             )
         }
     }
 
     companion object {
-        const val COMMAND = "promote-docker-image"
+        const val COMMAND = "promote-docker-images"
         const val SOURCE_REPOSITORY = "--source-repository"
         const val TARGET_REPOSITORY = "--target-repository"
-        const val IMAGE = "--image"
-        const val TAG = "--tag"
+        const val IMAGES = "--images"
         const val IGNORE_NOT_FOUND = "--ignore-not-found"
     }
 }

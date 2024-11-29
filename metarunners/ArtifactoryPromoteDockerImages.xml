@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Promote Artifactory Docker Images">
+    <description>Promote Artifactory Docker Images</description>
+    <settings>
+        <parameters>
+            <param name="ARTIFACTORY_DOCKER_SOURCE_REPOSITORY" value="%DOCKER_REPO_DEV%"
+                   spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_DOCKER_TARGET_REPOSITORY" value="%DOCKER_REPO_RELEASE%"
+                   spec="text description='Artifactory image source repository' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_DOCKER_IMAGES" value="%DISTRIBUTION_ARTIFACTS_COORDINATES_DOCKER%"
+                   spec="text description='Artifactory images coordinates in PATH:TAG format (separated by comma/semicolon)' validationMode='not_empty' display='normal'"/>
+            <param name="ARTIFACTORY_IGNORE_NOT_FOUND" value="true"
+                   spec="checkbox description='Silently skip not found images' uncheckedValue='false' checkedValue='true' display='normal'" />
+        </parameters>
+        <build-runners>
+            <runner name="promote docker images" type="OctopusArtifactoryAutomation">
+                <parameters>
+                    <param name="ARGS"
+                           value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-docker-image --source-repository=%ARTIFACTORY_DOCKER_SOURCE_REPOSITORY% --target-repository=%ARTIFACTORY_DOCKER_TARGET_REPOSITORY% --images=%ARTIFACTORY_DOCKER_IMAGES% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND%"/>
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements/>
+    </settings>
+</meta-runner>

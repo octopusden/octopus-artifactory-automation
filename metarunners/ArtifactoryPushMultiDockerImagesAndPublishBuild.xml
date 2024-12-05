@@ -1,0 +1,72 @@
+<meta-runner name="Push and publish Multi Artifactory Docker Images">
+    <description>Create and publish Artifactory build and push multi docker images to it</description>
+    <settings>
+        <parameters>
+            <param name="DOCKER_REGISTRY" value="%DOCKER_REGISTRY%" />
+            <param name="ARTIFACTORY_DOCKER_IMAGES" value="%DISTRIBUTION_DOCKER_IMAGE_NAMES%" />
+            <param name="ARTIFACTORY_DOCKER_BUILD_NUMBER" value="%BUILD_VERSION%" />
+            <param name="ARTIFACTORY_DOCKER_REPOSITORY" value="%DOCKER_REPO_DEV%" />
+            <param name="ARTIFACTORY_DOCKER_BUILD_NAME" value="%ARTIFACTORY_DOCKER_BUILD_NAME%" />
+        </parameters>
+        <build-runners>
+            <runner name="Push Image" type="python-runner">
+                <conditions>
+                    <does-not-equal name="DISTRIBUTION_DOCKER_IMAGE_NAMES" value="" />
+                </conditions>
+                <parameters>
+                    <param name="command" value="script" />
+                    <param name="coverageArgs" value="--omit=*lib*" />
+                    <param name="envTool" value="none" />
+                    <param name="installToolPackage" value="true" />
+                    <param name="isCoverageEnabled" value="false" />
+                    <param name="isTestReportingEnabled" value="true" />
+                    <param name="poetryExecutable" value="poetry" />
+                    <param name="pythonVersion" value="python3" />
+                    <param name="scriptContent"><![CDATA[import os
+import subprocess
+
+docker_images = "%ARTIFACTORY_DOCKER_IMAGES%"
+
+docker_registry = "%DOCKER_REGISTRY%"
+docker_repository = "%ARTIFACTORY_DOCKER_REPOSITORY%"
+build_name = "%ARTIFACTORY_DOCKER_BUILD_NAME%"
+build_number = "%ARTIFACTORY_DOCKER_BUILD_NUMBER%"
+engine = "%container.engine%"
+
+docker_images_list = [image.strip() for image in docker_images.split(",")]
+
+for docker_image in docker_images_list:
+command = (
+    f"jfrog rt {engine}-push {docker_registry}/{docker_image} {docker_repository} --build-name={build_name} --build-number={build_number}"
+)
+print(f"Executing: {command}")
+
+# Запуск команды
+result = subprocess.run(command, shell=True)
+
+if result.returncode != 0:
+    print(f"Command failed for {docker_image} with return code {result.returncode}")
+else:
+    print(f"Successfully pushed {docker_image}")]]></param>
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="virtualenvEnvName" value=".venv" />
+                    <param name="virtualenvFile" value="requirements.txt" />
+                </parameters>
+            </runner>
+            <runner name="Publish Artifactory Build" type="simpleRunner">
+                <conditions>
+                    <does-not-equal name="DISTRIBUTION_DOCKER_IMAGE_NAME" value="" />
+                </conditions>
+                <parameters>
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource" value="Job configuration" />
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource" value="Job configuration" />
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.useSpecs" value="false" />
+                    <param name="script.content"><![CDATA[jfrog rt bp %ARTIFACTORY_DOCKER_BUILD_NAME% %ARTIFACTORY_DOCKER_BUILD_NUMBER%]]></param>
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="use.custom.script" value="true" />
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements />
+    </settings>
+</meta-runner>

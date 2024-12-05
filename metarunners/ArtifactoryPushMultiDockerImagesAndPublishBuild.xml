@@ -9,48 +9,40 @@
             <param name="ARTIFACTORY_DOCKER_BUILD_NAME" value="%ARTIFACTORY_DOCKER_BUILD_NAME%" />
         </parameters>
         <build-runners>
-            <runner name="Push Image" type="python-runner">
-                <conditions>
-                    <does-not-equal name="DISTRIBUTION_DOCKER_IMAGE_NAMES" value="" />
-                </conditions>
+            <runner name="" type="kotlinScript">
                 <parameters>
-                    <param name="command" value="script" />
-                    <param name="coverageArgs" value="--omit=*lib*" />
-                    <param name="envTool" value="none" />
-                    <param name="installToolPackage" value="true" />
-                    <param name="isCoverageEnabled" value="false" />
-                    <param name="isTestReportingEnabled" value="true" />
-                    <param name="poetryExecutable" value="poetry" />
-                    <param name="pythonVersion" value="python3" />
-                    <param name="scriptContent"><![CDATA[import os
-import subprocess
+                    <param name="kotlinPath" value="%teamcity.tool.kotlin.compiler.1.5.32%" />
+                    <param name="scriptContent"><![CDATA[import java.util.concurrent.TimeUnit
 
-docker_images = "%ARTIFACTORY_DOCKER_IMAGES%"
 
-docker_registry = "%DOCKER_REGISTRY%"
-docker_repository = "%ARTIFACTORY_DOCKER_REPOSITORY%"
-build_name = "%ARTIFACTORY_DOCKER_BUILD_NAME%"
-build_number = "%ARTIFACTORY_DOCKER_BUILD_NUMBER%"
-engine = "%container.engine%"
+val dockerImages = "%ARTIFACTORY_DOCKER_IMAGES%"
+val dockerRegistry = "%DOCKER_REGISTRY%"
+val dockerRepository = "%ARTIFACTORY_DOCKER_REPOSITORY%"
+val buildName = "%ARTIFACTORY_DOCKER_BUILD_NAME%"
+val buildNumber = "%ARTIFACTORY_DOCKER_BUILD_NUMBER%"
+val engine = "%container.engine%"
 
-docker_images_list = [image.strip() for image in docker_images.split(",")]
+val dockerImagesList = dockerImages.split(",").map { it.trim() }
 
-for docker_image in docker_images_list:
-command = (
-    f"jfrog rt {engine}-push {docker_registry}/{docker_image} {docker_repository} --build-name={build_name} --build-number={build_number}"
-)
-print(f"Executing: {command}")
+for (dockerImage in dockerImagesList) {
+    val command = "jfrog rt $engine-push $dockerRegistry/$dockerImage $dockerRepository --build-name=$buildName --build-number=$buildNumber"
+    println("Executing: $command")
 
-# Запуск команды
-result = subprocess.run(command, shell=True)
+	val process = ProcessBuilder(*command.split(" ").toTypedArray())
+        .inheritIO()
+        .start()
 
-if result.returncode != 0:
-    print(f"Command failed for {docker_image} with return code {result.returncode}")
-else:
-    print(f"Successfully pushed {docker_image}")]]></param>
+    val success = process.waitFor(10, TimeUnit.MINUTES)
+
+    if (!success || process.exitValue() != 0) {
+        println("Command failed for $dockerImage with exit code ${process.exitValue()} and message ${process.inputStream.bufferedReader().readText()}")
+    } else {
+        println("Successfully pushed $dockerImage")
+    }
+
+}]]></param>
+                    <param name="scriptType" value="customScript" />
                     <param name="teamcity.step.mode" value="default" />
-                    <param name="virtualenvEnvName" value=".venv" />
-                    <param name="virtualenvFile" value="requirements.txt" />
                 </parameters>
             </runner>
             <runner name="Publish Artifactory Build" type="simpleRunner">

@@ -3,7 +3,7 @@
     <settings>
         <parameters>
             <param name="DOCKER_REGISTRY" value="%DOCKER_REGISTRY%" />
-            <param name="ARTIFACTORY_DOCKER_IMAGES" value="%DISTRIBUTION_DOCKER_IMAGE_NAMES%" />
+            <param name="ARTIFACTORY_DOCKER_IMAGES" value="%DISTRIBUTION_ARTIFACTS_COORDINATES_DOCKER%" />
             <param name="ARTIFACTORY_DOCKER_BUILD_NUMBER" value="%BUILD_VERSION%" />
             <param name="ARTIFACTORY_DOCKER_REPOSITORY" value="%DOCKER_REPO_DEV%" />
             <param name="ARTIFACTORY_DOCKER_BUILD_NAME" value="%ARTIFACTORY_DOCKER_BUILD_NAME%" />

@@ -16,7 +16,7 @@
             <runner name="promote docker images" type="OctopusArtifactoryAutomation">
                 <parameters>
                     <param name="ARGS"
-                           value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-docker-image --source-repository=%ARTIFACTORY_DOCKER_SOURCE_REPOSITORY% --target-repository=%ARTIFACTORY_DOCKER_TARGET_REPOSITORY% --images=%ARTIFACTORY_DOCKER_IMAGES% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND%"/>
+                           value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-docker-images --source-repository=%ARTIFACTORY_DOCKER_SOURCE_REPOSITORY% --target-repository=%ARTIFACTORY_DOCKER_TARGET_REPOSITORY% --images=%ARTIFACTORY_DOCKER_IMAGES% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND%"/>
                 </parameters>
             </runner>
         </build-runners>

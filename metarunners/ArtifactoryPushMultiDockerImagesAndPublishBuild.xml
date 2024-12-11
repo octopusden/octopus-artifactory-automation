@@ -25,8 +25,8 @@ val engine = "%container.engine%"
 val dockerImagesList = dockerImages.split(",").map { it.trim() }
 
 for (dockerImage in dockerImagesList) {
-    val command = "jfrog rt $engine-push $dockerRegistry/$dockerImage $dockerRepository --build-name=$buildName --build-number=$buildNumber"
-    println("Executing: $command")
+    val command = "jfrog rt \$engine-push \$dockerRegistry/\$dockerImage \$dockerRepository --build-name=\$buildName --build-number=\$buildNumber"
+    println("Executing: \$command")
 
 	val process = ProcessBuilder(*command.split(" ").toTypedArray())
         .inheritIO()
@@ -35,9 +35,9 @@ for (dockerImage in dockerImagesList) {
     val success = process.waitFor(10, TimeUnit.MINUTES)
 
     if (!success || process.exitValue() != 0) {
-        println("Command failed for $dockerImage with exit code ${process.exitValue()} and message ${process.inputStream.bufferedReader().readText()}")
+        println("Command failed for \$dockerImage with exit code \${process.exitValue()} and message \${process.inputStream.bufferedReader().readText()}")
     } else {
-        println("Successfully pushed $dockerImage")
+        println("Successfully pushed \$dockerImage")
     }
 
 }]]></param>

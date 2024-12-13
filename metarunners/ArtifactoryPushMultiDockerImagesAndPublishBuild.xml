@@ -35,7 +35,7 @@ for (dockerImage in dockerImagesList) {
     val success = process.waitFor(10, TimeUnit.MINUTES)
 
     if (!success || process.exitValue() != 0) {
-        println("Command failed for \$dockerImage with exit code \${process.exitValue()} and message \${process.inputStream.bufferedReader().readText()}")
+        throw RuntimeException("Command failed for \$dockerImage with exit code \${process.exitValue()} and message \${process.inputStream.bufferedReader().readText()}")
     } else {
         println("Successfully pushed \$dockerImage")
     }

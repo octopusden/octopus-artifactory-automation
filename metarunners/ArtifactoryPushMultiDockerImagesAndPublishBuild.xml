@@ -1,0 +1,61 @@
+<meta-runner name="Push and publish Multi Artifactory Docker Images">
+    <description>Create and publish Artifactory build and push multi docker images to it</description>
+    <settings>
+        <parameters>
+            <param name="DOCKER_REGISTRY" value="%DOCKER_REGISTRY%" />
+            <param name="ARTIFACTORY_DOCKER_IMAGES" value="%DISTRIBUTION_ARTIFACTS_COORDINATES_DOCKER%" />
+            <param name="ARTIFACTORY_DOCKER_BUILD_NUMBER" value="%BUILD_VERSION%" />
+            <param name="ARTIFACTORY_DOCKER_REPOSITORY" value="%DOCKER_REPO_DEV%" />
+            <param name="ARTIFACTORY_DOCKER_BUILD_NAME" value="%ARTIFACTORY_DOCKER_BUILD_NAME%" />
+        </parameters>
+        <build-runners>
+            <runner name="" type="kotlinScript">
+                <parameters>
+                    <param name="kotlinPath" value="%teamcity.tool.kotlin.compiler.1.5.32%" />
+                    <param name="scriptContent"><![CDATA[import java.util.concurrent.TimeUnit
+
+
+val dockerImages = "%ARTIFACTORY_DOCKER_IMAGES%"
+val dockerRegistry = "%DOCKER_REGISTRY%"
+val dockerRepository = "%ARTIFACTORY_DOCKER_REPOSITORY%"
+val buildName = "%ARTIFACTORY_DOCKER_BUILD_NAME%"
+val buildNumber = "%ARTIFACTORY_DOCKER_BUILD_NUMBER%"
+val engine = "%container.engine%"
+
+val dockerImagesList = dockerImages.split(",").map { it.trim() }
+
+for (dockerImage in dockerImagesList) {
+    val command = "jfrog rt \$engine-push \$dockerRegistry/\$dockerImage \$dockerRepository --build-name=\$buildName --build-number=\$buildNumber"
+    println("Executing: \$command")
+
+	val process = ProcessBuilder(*command.split(" ").toTypedArray())
+        .inheritIO()
+        .start()
+
+    val success = process.waitFor(10, TimeUnit.MINUTES)
+
+    if (!success || process.exitValue() != 0) {
+        throw RuntimeException("Command failed for \$dockerImage with exit code \${process.exitValue()} and message \${process.inputStream.bufferedReader().readText()}")
+    } else {
+        println("Successfully pushed \$dockerImage")
+    }
+
+}]]></param>
+                    <param name="scriptType" value="customScript" />
+                    <param name="teamcity.step.mode" value="default" />
+                </parameters>
+            </runner>
+            <runner name="Publish Artifactory Build" type="simpleRunner">
+                <parameters>
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource" value="Job configuration" />
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource" value="Job configuration" />
+                    <param name="org.jfrog.artifactory.selectedDeployableServer.useSpecs" value="false" />
+                    <param name="script.content"><![CDATA[jfrog rt bp %ARTIFACTORY_DOCKER_BUILD_NAME% %ARTIFACTORY_DOCKER_BUILD_NUMBER%]]></param>
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="use.custom.script" value="true" />
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements />
+    </settings>
+</meta-runner>

@@ -26,9 +26,9 @@ class ArtifactoryCommand : CliktCommand(name = "") {
         }
     }
     private val token by option(TOKEN_OPTION, help = "Artifactory token").convert { it.trim() }.validate {
-        /*require(user?.isBlank() == false && password?.isBlank() == false || it.isNotBlank()) {
+        require(user?.isBlank() == false && password?.isBlank() == false || it.isNotBlank()) {
             "Either $TOKEN_OPTION or $USER_OPTION/$PASSWORD_OPTION must be set"
-        }*/
+        }
     }
 
     private val context by findOrSetObject { mutableMapOf<String, Any>() }

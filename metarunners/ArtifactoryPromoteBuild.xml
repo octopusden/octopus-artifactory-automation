@@ -20,7 +20,7 @@
             <runner name="promote build" type="OctopusArtifactoryAutomation">
                 <parameters>
                     <param name="ARGS"
-                           value="--url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-build --build-name=%ARTIFACTORY_BUILD_NAME% --build-number=%ARTIFACTORY_BUILD_NUMBER% --target-repository=%ARTIFACTORY_TARGET_REPOSITORY% --target-status=%ARTIFACTORY_TARGET_STATUS% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND% --force=%ARTIFACTORY_FORCE_PROMOTE%"/>
+                           value="--token=%ARTIFACTORY_ACCESS_TOKEN% --url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% promote-build --build-name=%ARTIFACTORY_BUILD_NAME% --build-number=%ARTIFACTORY_BUILD_NUMBER% --target-repository=%ARTIFACTORY_TARGET_REPOSITORY% --target-status=%ARTIFACTORY_TARGET_STATUS% --ignore-not-found=%ARTIFACTORY_IGNORE_NOT_FOUND% --force=%ARTIFACTORY_FORCE_PROMOTE%"/>
                 </parameters>
             </runner>
         </build-runners>

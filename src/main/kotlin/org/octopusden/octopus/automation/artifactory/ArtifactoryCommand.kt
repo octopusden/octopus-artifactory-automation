@@ -19,7 +19,9 @@ class ArtifactoryCommand : CliktCommand(name = "") {
     private val url by option(URL_OPTION, help = "Artifactory URL").convert { it.trim() }.required()
         .check("$URL_OPTION is empty") { it.isNotEmpty() }
     private val user by option(USER_OPTION, help = "Artifactory user").convert { it.trim() }
-        .check("$USER_OPTION is empty") { it.isNotEmpty() }
+        .check("$USER_OPTION is empty") {
+            !token.isNullOrBlank() || !it.isNullOrBlank()
+        }
     private val password by option(PASSWORD_OPTION, help = "Artifactory password").convert { it.trim() }.validate {
         require(it.isNotBlank() && user?.isNotBlank() == true || user?.isBlank() == true) {
             "Password must not be blank with basic authentication"
@@ -34,12 +36,12 @@ class ArtifactoryCommand : CliktCommand(name = "") {
         val client: ArtifactoryClient = ArtifactoryClassicClient(object : ClientParametersProvider {
             override fun getApiUrl() = url
             override fun getAuth(): CredentialProvider =
-                token?.let { t -> StandardBearerTokenCredentialProvider(t) }
+                token?.takeIf { it.isNotEmpty() }?.let { t -> StandardBearerTokenCredentialProvider(t) }
                     ?: user?.let { u -> password?.let { p -> StandardBasicCredCredentialProvider(u, p) } }
                     ?: throw IllegalArgumentException("Artifactory credentials not found")
         })
 
-        val resultUser = token?.let { client.getTokens().tokens.map { t -> t.subject.substringAfterLast("/") } }
+        val resultUser = token?.takeIf { it.isNotEmpty() }?.let { client.getTokens().tokens.map { t -> t.subject.substringAfterLast("/") } }
             ?.firstOrNull { it.isNotBlank() }
             ?: user
             ?: throw IllegalStateException("Artifactory user not found")

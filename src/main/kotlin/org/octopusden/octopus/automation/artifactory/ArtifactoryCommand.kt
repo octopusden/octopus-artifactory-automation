@@ -36,12 +36,12 @@ class ArtifactoryCommand : CliktCommand(name = "") {
         val client: ArtifactoryClient = ArtifactoryClassicClient(object : ClientParametersProvider {
             override fun getApiUrl() = url
             override fun getAuth(): CredentialProvider =
-                token?.takeIf { it.isNotEmpty() }?.let { t -> StandardBearerTokenCredentialProvider(t) }
+                token?.takeIf { it.isNotBlank() }?.let { t -> StandardBearerTokenCredentialProvider(t) }
                     ?: user?.let { u -> password?.let { p -> StandardBasicCredCredentialProvider(u, p) } }
                     ?: throw IllegalArgumentException("Artifactory credentials not found")
         })
 
-        val resultUser = token?.takeIf { it.isNotEmpty() }?.let { client.getTokens().tokens.map { t -> t.subject.substringAfterLast("/") } }
+        val resultUser = token?.takeIf { it.isNotBlank() }?.let { client.getTokens().tokens.map { t -> t.subject.substringAfterLast("/") } }
             ?.firstOrNull { it.isNotBlank() }
             ?: user
             ?: throw IllegalStateException("Artifactory user not found")

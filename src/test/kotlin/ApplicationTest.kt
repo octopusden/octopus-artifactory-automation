@@ -34,6 +34,7 @@ class ApplicationTest {
         const val ARTIFACTORY_PASSWORD = "password"
 
         val ARTIFACTORY_OPTIONS = arrayOf(
+            "${ArtifactoryCommand.TOKEN_OPTION}=",
             "${ArtifactoryCommand.URL_OPTION}=$ARTIFACTORY_URL",
             "${ArtifactoryCommand.USER_OPTION}=$ARTIFACTORY_USER",
             "${ArtifactoryCommand.PASSWORD_OPTION}=$ARTIFACTORY_PASSWORD"

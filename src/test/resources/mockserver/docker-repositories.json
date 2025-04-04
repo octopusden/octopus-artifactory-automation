@@ -3,5 +3,10 @@
     "existed-image": {
       "existed-tag" : "docker-release-repository"
     }
+  },
+  "docker-rc-repository" : {
+    "existed-image-rc": {
+      "existed-tag" : "docker-release-repository"
+    }
   }
 }

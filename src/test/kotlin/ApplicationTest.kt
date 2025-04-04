@@ -92,6 +92,14 @@ class ApplicationTest {
                 )
             ),
             Arguments.of(
+                "Test promote-docker-images from RC to Release", 0, arrayOf(
+                    ArtifactoryPromoteDockerImages.COMMAND,
+                    "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=docker-dev-repository,docker-rc-repository",
+                    "${ArtifactoryPromoteDockerImages.TARGET_REPOSITORY}=docker-release-repository",
+                    "${ArtifactoryPromoteDockerImages.IMAGES}=existed-image-rc:existed-tag"
+                )
+            ),
+            Arguments.of(
                 "Test promote-docker-images with not existed source docker repository", 1, arrayOf(
                     ArtifactoryPromoteDockerImages.COMMAND,
                     "${ArtifactoryPromoteDockerImages.SOURCE_REPOSITORY}=not-existed-docker-dev-repository",

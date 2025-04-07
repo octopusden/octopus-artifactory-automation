@@ -9,14 +9,19 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import org.octopusden.octopus.infrastructure.artifactory.client.ArtifactoryClient
 import org.octopusden.octopus.infrastructure.artifactory.client.dto.PromoteDockerImageRequest
+import org.octopusden.octopus.infrastructure.artifactory.client.exception.NotFoundException
 import org.slf4j.Logger
 
 class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
     private val context by requireObject<MutableMap<String, Any>>()
 
-    private val sourceRepository by option(SOURCE_REPOSITORY, help = "Source Artifactory docker repository key")
-        .convert { it.trim() }.required()
-        .check("$SOURCE_REPOSITORY is empty") { it.isNotEmpty() }
+    private val sourceRepository by option(
+        SOURCE_REPOSITORY,
+        help = "Sources Artifactory docker repository key (separated by comma/semicolon)"
+    )
+        .convert { sources ->
+            sources.split(SPLIT_SYMBOLS.toRegex()).map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+        }.required().check("$SOURCE_REPOSITORY is empty") { it.isNotEmpty() }
 
     private val targetRepository by option(TARGET_REPOSITORY, help = "Target Artifactory docker repository key")
         .convert { it.trim() }.required()
@@ -39,17 +44,23 @@ class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
     }
 
     private fun promoteDockerImage(image: String) {
-        log.info("Promote docker image '$image' from '$sourceRepository' to '$targetRepository' repository")
         val coordinates = image.split(':').filter { it.isNotEmpty() }
         if (coordinates.size != 2) {
             log.warn("Image coordinates '$image' has invalid format. Skip promotion")
             return
         }
-        Util.handleNotFoundException(ignoreNotFound) {
-            client.promoteDockerImage(
-                sourceRepository,
-                PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository)
-            )
+        sourceRepository.forEach { source ->
+            try {
+                log.info("Promote docker image '$image' from '$source' to '$targetRepository' repository")
+                client.promoteDockerImage(
+                    source,
+                    PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository)
+                )
+                return
+            } catch (_: NotFoundException) {}
+        }
+        if (!ignoreNotFound) {
+            throw NotFoundException("Docker image '$image' not found in '$sourceRepository'")
         }
     }
 

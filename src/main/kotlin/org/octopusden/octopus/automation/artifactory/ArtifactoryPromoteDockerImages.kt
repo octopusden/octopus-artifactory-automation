@@ -56,13 +56,11 @@ class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
                     source,
                     PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository)
                 )
-                true
-            } catch (_: NotFoundException) {
-                false
-            }
-        } ?: {
-            if (!ignoreNotFound)
-                throw NotFoundException("Docker image '$image' not found in '$sourceRepository'")
+                return
+            } catch (_: NotFoundException) { false }
+        }
+        if (!ignoreNotFound) {
+            throw NotFoundException("Docker image '$image' not found in '$sourceRepository'")
         }
     }
 

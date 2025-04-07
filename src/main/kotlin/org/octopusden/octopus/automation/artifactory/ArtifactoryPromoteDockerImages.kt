@@ -49,21 +49,20 @@ class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
             log.warn("Image coordinates '$image' has invalid format. Skip promotion")
             return
         }
-        var notFound: Boolean = true
-        sourceRepository.forEach { repo ->
-            if (notFound) {
-                log.info("Promote docker image '$image' from '$repo' to '$targetRepository' repository")
-                Util.handleNotFoundException(true) {
-                    client.promoteDockerImage(
-                        repo,
-                        PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository)
-                    )
-                    notFound = false
-                }
+        sourceRepository.firstOrNull { source ->
+            try {
+                log.info("Promote docker image '$image' from '$source' to '$targetRepository' repository")
+                client.promoteDockerImage(
+                    source,
+                    PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository)
+                )
+                true
+            } catch (_: NotFoundException) {
+                false
             }
-        }
-        if (notFound && !ignoreNotFound) {
-            throw NotFoundException("Docker image '$image' not found in '$sourceRepository'")
+        } ?: {
+            if (!ignoreNotFound)
+                throw NotFoundException("Docker image '$image' not found in '$sourceRepository'")
         }
     }
 

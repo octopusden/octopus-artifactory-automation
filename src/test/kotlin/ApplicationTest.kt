@@ -12,10 +12,24 @@ import org.octopusden.octopus.automation.artifactory.ArtifactoryPromoteDockerIma
 class ApplicationTest {
     private val jar = System.getProperty("jar") ?: throw IllegalStateException("System property 'jar' must be provided")
 
+    /**
+     * Test with basic authentication
+     */
     @ParameterizedTest
     @MethodSource("commands")
     fun parametrizedTest(name: String, expectedExitCode: Int, command: Array<String>) {
         Assertions.assertEquals(expectedExitCode, execute(name, *ARTIFACTORY_OPTIONS, *command))
+    }
+
+    /**
+     * Test with token authentication
+     */
+    @ParameterizedTest
+    @MethodSource("commands")
+    fun parametrizedTestWithToken(name: String, expectedExitCode: Int, command: Array<String>) {
+        println("Executing command with token authentication: ${command.joinToString(" ")}")
+        println("${ARTIFACTORY_OPTIONS_WITH_TOKEN.joinToString( " ")}")
+        Assertions.assertEquals(expectedExitCode, execute(name, *ARTIFACTORY_OPTIONS_WITH_TOKEN, *command))
     }
 
     private fun execute(name: String, vararg command: String) =
@@ -32,12 +46,19 @@ class ApplicationTest {
         const val ARTIFACTORY_URL = "http://localhost:1080"
         const val ARTIFACTORY_USER = "admin"
         const val ARTIFACTORY_PASSWORD = "password"
+        const val ARTIFACTORY_TOKEN = "token"
 
         val ARTIFACTORY_OPTIONS = arrayOf(
             "${ArtifactoryCommand.TOKEN_OPTION}=",
             "${ArtifactoryCommand.URL_OPTION}=$ARTIFACTORY_URL",
             "${ArtifactoryCommand.USER_OPTION}=$ARTIFACTORY_USER",
             "${ArtifactoryCommand.PASSWORD_OPTION}=$ARTIFACTORY_PASSWORD"
+        )
+
+        val ARTIFACTORY_OPTIONS_WITH_TOKEN = arrayOf(
+            "${ArtifactoryCommand.TOKEN_OPTION}=$ARTIFACTORY_TOKEN",
+            "${ArtifactoryCommand.URL_OPTION}=$ARTIFACTORY_URL",
+            "${ArtifactoryCommand.USER_OPTION}=$ARTIFACTORY_USER"
         )
 
         //<editor-fold defaultstate="collapsed" desc="Test Data">

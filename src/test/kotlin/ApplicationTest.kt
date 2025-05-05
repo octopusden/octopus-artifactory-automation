@@ -27,8 +27,6 @@ class ApplicationTest {
     @ParameterizedTest
     @MethodSource("commands")
     fun parametrizedTestWithToken(name: String, expectedExitCode: Int, command: Array<String>) {
-        println("Executing command with token authentication: ${command.joinToString(" ")}")
-        println("${ARTIFACTORY_OPTIONS_WITH_TOKEN.joinToString( " ")}")
         Assertions.assertEquals(expectedExitCode, execute(name, *ARTIFACTORY_OPTIONS_WITH_TOKEN, *command))
     }
 

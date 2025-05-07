@@ -19,7 +19,15 @@ abstract class ConfigureMockServer : DefaultTask() {
     @TaskAction
     fun configureMockServer() {
         mockServerClient.reset()
-        val builds = load("builds.json", object : TypeReference<Map<String, Map<String, Any>>>() {})
+
+        mockServerClient.`when`(
+            HttpRequest.request().withMethod("GET")
+                .withPath("/access/api/v1/tokens")
+        ).respond {
+            val tokens = load("tokens.json", object : TypeReference<Any>() {})
+            HttpResponse.response().withContentType(MediaType.APPLICATION_JSON_UTF_8).withStatusCode(200)
+                .withBody(mapper.writeValueAsString(tokens))
+        }
 
         mockServerClient.`when`(
             HttpRequest.request().withMethod("GET")
@@ -29,6 +37,8 @@ abstract class ConfigureMockServer : DefaultTask() {
             HttpResponse.response().withContentType(MediaType.APPLICATION_JSON_UTF_8).withStatusCode(200)
                 .withBody(mapper.writeValueAsString(version))
         }
+
+        val builds = load("builds.json", object : TypeReference<Map<String, Map<String, Any>>>() {})
 
         mockServerClient.`when`(
             HttpRequest.request().withMethod("GET")

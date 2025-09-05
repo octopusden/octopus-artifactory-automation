@@ -8,8 +8,8 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import org.octopusden.octopus.infrastructure.artifactory.client.ArtifactoryClient
-import org.octopusden.octopus.infrastructure.artifactory.client.dto.BuildInfo
 import org.octopusden.octopus.infrastructure.artifactory.client.dto.PromoteBuildRequest
+import org.octopusden.octopus.infrastructure.artifactory.client.exception.NotFoundException
 import org.slf4j.Logger
 
 class ArtifactoryPromoteBuild : CliktCommand(name = COMMAND) {
@@ -42,36 +42,28 @@ class ArtifactoryPromoteBuild : CliktCommand(name = COMMAND) {
     private val username by lazy { context[ArtifactoryCommand.USERNAME] as String }
 
     override fun run() {
-        log.info("Promote Artifactory build: '$buildName:$buildNumber', to repository: '$targetRepository', target status: '$targetStatus'")
-        promoteBuild()
-    }
-
-    private fun promoteBuild() {
-        getBuildInfo(buildName, buildNumber)?.let { buildInfo ->
-            promote(buildInfo, targetRepository, targetStatus, force)
+        val build = "$buildName:$buildNumber"
+        log.info("Promote Artifactory build '$build' to repository '$targetRepository' with target status '$targetStatus'")
+        val buildInfo = try {
+            client.getBuildInfo(buildName, buildNumber).buildInfo
+        } catch (e: NotFoundException) {
+            if (ignoreNotFound) {
+                log.info("Artifactory build '$build' is not found")
+                return
+            } else throw e
         }
-    }
-
-    private fun getBuildInfo(buildName: String, buildNumber: String): BuildInfo? {
-        return Util.handleNotFoundException(ignoreNotFound) {
-            client.getBuildInfo(buildName, buildNumber).buildInfo.also { buildInfo ->
-                if (buildInfo.modules.isNullOrEmpty()) {
-                    log.warn("The build $buildName:$buildNumber found but has no modules. Check creating and publishing build artifacts.")
-                }
-            }
+        if (buildInfo.modules.isNullOrEmpty()) {
+            log.warn("Artifactory build '$build' is empty (has no modules)")
         }
-    }
-
-    private fun promote(buildInfo: BuildInfo, targetRepository: String, targetStatus: String, forcePromote: Boolean) {
-        if (forcePromote || (buildInfo.statuses?.find { it.status == targetStatus } == null)) {
+        if (force || (buildInfo.statuses?.find { it.status == targetStatus } == null)) {
             val promote = PromoteBuildRequest(username, targetRepository, targetStatus)
             client.promoteBuild(buildInfo.name, buildInfo.number, promote).also {
                 it.messages.joinToString { artifactoryMessage -> artifactoryMessage.message }.let { message ->
-                    log.info("Build $buildName:$buildNumber promoted with message: $message")
+                    log.info("Artifactory build '$build' promoted with message: $message")
                 }
             }
         } else {
-            log.info("Build $buildName:$buildNumber already promoted to $targetStatus")
+            log.info("Artifactory build '$build' already has target status '$targetStatus'")
         }
     }
 

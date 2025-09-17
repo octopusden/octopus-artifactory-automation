@@ -2,7 +2,6 @@ import com.avast.gradle.dockercompose.ComposeExtension
 import java.time.Duration
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.octopusden.octopus.task.ConfigureMockServer
 import java.net.InetAddress
 import java.util.zip.CRC32
@@ -32,11 +31,8 @@ if (version == "unspecified") {
 group = "org.octopusden.octopus.automation.artifactory"
 description = "Octopus Artifactory Automation"
 
-tasks.withType<KotlinCompile>().configureEach {
-    compilerOptions {
-        suppressWarnings.set(true)
-        jvmTarget.set(JvmTarget.JVM_1_8)
-    }
+kotlin {
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
 }
 
 java.targetCompatibility = JavaVersion.VERSION_1_8
@@ -86,7 +82,7 @@ ocTemplate {
     workDir.set(layout.buildDirectory.dir("okd"))
     clusterDomain.set("okdClusterDomain".getExt())
     namespace.set("okdProject".getExt())
-    prefix.set("a-automation")
+    prefix.set("art-auto")
     projectVersion.set(defaultVersion)
 
     "okdWebConsoleUrl".getExt().takeIf { it.isNotBlank() }?.let{

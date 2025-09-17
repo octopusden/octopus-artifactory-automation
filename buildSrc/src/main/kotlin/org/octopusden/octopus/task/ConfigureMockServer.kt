@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.provider.Property
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -14,10 +16,12 @@ import org.octopusden.octopus.infrastructure.artifactory.client.dto.PromoteDocke
 
 
 abstract class ConfigureMockServer : DefaultTask() {
-    private val mockServerClient = MockServerClient("localhost", 1080)
+    @get:Input abstract val host: Property<String>
+    @get:Input abstract val port: Property<Int>
 
     @TaskAction
     fun configureMockServer() {
+        val mockServerClient = MockServerClient(host.get(), port.get())
         mockServerClient.reset()
 
         mockServerClient.`when`(

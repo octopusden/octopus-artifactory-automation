@@ -39,9 +39,13 @@ class ApplicationTest {
             .waitFor()
 
     companion object {
-        const val HELP_OPTION = "-h"
+        private val mockserverHost = System.getProperty("test.mockserver-host")
+            ?: throw Exception("System property 'test.mockserver-host' must be defined")
+        private val mockserverPort = System.getProperty("test.mockserver-port")
+            ?: throw Exception("System property 'test.mockserver-port' must be defined")
 
-        const val ARTIFACTORY_URL = "http://localhost:1080"
+        private val ARTIFACTORY_URL = "http://$mockserverHost:$mockserverPort"
+        const val HELP_OPTION = "-h"
         const val ARTIFACTORY_USER = "admin"
         const val ARTIFACTORY_PASSWORD = "password"
         const val ARTIFACTORY_TOKEN = "token"

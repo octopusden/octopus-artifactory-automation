@@ -24,7 +24,7 @@ val containerEngineParam = "%container.engine%"
 
 // Normalize container engine: validate and prefer podman if multiple values
 val engine = containerEngineParam.split(",")
-    .map { it.trim() }
+    .map { it.trim().lowercase() }
     .filter { it.isNotEmpty() }
     .let { engines ->
         val validEngines = engines.filter { it == "docker" || it == "podman" }

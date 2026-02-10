@@ -20,7 +20,24 @@ val dockerRegistry = "%DOCKER_REGISTRY%"
 val dockerRepository = "%ARTIFACTORY_DOCKER_REPOSITORY%"
 val buildName = "%ARTIFACTORY_DOCKER_BUILD_NAME%"
 val buildNumber = "%ARTIFACTORY_DOCKER_BUILD_NUMBER%"
-val engine = "%container.engine%"
+val containerEngineParam = "%container.engine%"
+
+// Normalize container engine: validate and prefer podman if multiple values
+val engine = containerEngineParam.split(",")
+    .map { it.trim() }
+    .filter { it.isNotEmpty() }
+    .let { engines ->
+        val validEngines = engines.filter { it == "docker" || it == "podman" }
+
+        if (validEngines.isEmpty()) {
+            throw RuntimeException("Invalid container.engine value: '\$containerEngineParam'. Must contain 'docker' or 'podman'.")
+        }
+
+        // Prefer podman if present, otherwise use docker
+        if (validEngines.contains("podman")) "podman" else validEngines.first()
+    }
+
+println("Using container engine: \$engine")
 
 val dockerImagesList = dockerImages.split(",").map { it.trim() }
 

@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.check
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import org.octopusden.octopus.automation.artifactory.utils.ContainerEngineNormalizer
@@ -36,6 +37,7 @@ class ArtifactoryPushMultiDockerImagesAndPublish : CliktCommand(name = COMMAND) 
 
     private val containerEngine by option(CONTAINER_ENGINE, help = "Container engine to use (docker/podman, or comma-separated list - prefers podman)")
         .convert { ContainerEngineNormalizer.normalize(it) }
+        .default(ContainerEngineNormalizer.DEFAULT_CONTAINER_ENGINE)
 
     private val log by lazy { context[ArtifactoryCommand.LOG] as Logger }
 

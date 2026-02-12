@@ -51,19 +51,23 @@ class ArtifactoryPushMultiDockerImagesAndPublish : CliktCommand(name = COMMAND) 
     }
 
     private fun pushDockerImage(dockerImage: String) {
-        val command = "jfrog rt $containerEngine-push $dockerRegistry/$dockerImage $dockerRepository --build-name=$buildName --build-number=$buildNumber"
-        executeCommand(command, "Push docker image '$dockerImage'")
+        executeCommand(
+            listOf("jfrog", "rt", "$containerEngine-push", "$dockerRegistry/$dockerImage", dockerRepository, "--build-name=$buildName", "--build-number=$buildNumber"),
+            "Push docker image '$dockerImage'"
+        )
     }
 
     private fun publishBuildInfo() {
-        val command = "jfrog rt bp $buildName $buildNumber"
-        executeCommand(command, "Publish build info for '$buildName:$buildNumber'")
+        executeCommand(
+            listOf("jfrog", "rt", "bp", buildName, buildNumber),
+            "Publish build info for '$buildName:$buildNumber'"
+        )
     }
 
-    private fun executeCommand(command: String, description: String) {
+    private fun executeCommand(command: List<String>, description: String) {
         log.info("$description: $command")
 
-        val process = ProcessBuilder(*command.split(" ").toTypedArray())
+        val process = ProcessBuilder(command)
             .inheritIO()
             .start()
 

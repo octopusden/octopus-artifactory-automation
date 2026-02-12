@@ -4,6 +4,7 @@ object ContainerEngineNormalizer {
 
     const val DOCKER = "docker"
     const val PODMAN = "podman"
+    const val DEFAULT_CONTAINER_ENGINE = PODMAN
 
     private val VALID_ENGINES = setOf(DOCKER, PODMAN)
 
@@ -23,11 +24,11 @@ object ContainerEngineNormalizer {
 
         if (validEngines.isEmpty()) {
             throw IllegalArgumentException(
-                "Invalid container.engine value: '$containerEngineParam'. Must contain 'docker' or 'podman'."
+                "Invalid container.engine value: '$containerEngineParam'. Must contain '$DOCKER' or '$PODMAN'."
             )
         }
 
-        return if (validEngines.contains(PODMAN)) PODMAN else validEngines.first()
+        return if (validEngines.contains(DEFAULT_CONTAINER_ENGINE)) DEFAULT_CONTAINER_ENGINE else validEngines.first()
     }
 
 }

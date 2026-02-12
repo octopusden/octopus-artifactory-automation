@@ -4,6 +4,7 @@ import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.options.check
 import com.github.ajalt.clikt.parameters.options.convert
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
 import org.octopusden.octopus.automation.artifactory.utils.ContainerEngineNormalizer
@@ -36,6 +37,7 @@ class ArtifactoryPushMultiDockerImagesAndPublish : CliktCommand(name = COMMAND) 
 
     private val containerEngine by option(CONTAINER_ENGINE, help = "Container engine to use (docker/podman, or comma-separated list - prefers podman)")
         .convert { ContainerEngineNormalizer.normalize(it) }
+        .default(ContainerEngineNormalizer.DEFAULT_CONTAINER_ENGINE)
 
     private val log by lazy { context[ArtifactoryCommand.LOG] as Logger }
 
@@ -49,19 +51,23 @@ class ArtifactoryPushMultiDockerImagesAndPublish : CliktCommand(name = COMMAND) 
     }
 
     private fun pushDockerImage(dockerImage: String) {
-        val command = "jfrog rt $containerEngine-push $dockerRegistry/$dockerImage $dockerRepository --build-name=$buildName --build-number=$buildNumber"
-        executeCommand(command, "Push docker image '$dockerImage'")
+        executeCommand(
+            listOf("jfrog", "rt", "$containerEngine-push", "$dockerRegistry/$dockerImage", dockerRepository, "--build-name=$buildName", "--build-number=$buildNumber"),
+            "Push docker image '$dockerImage'"
+        )
     }
 
     private fun publishBuildInfo() {
-        val command = "jfrog rt bp $buildName $buildNumber"
-        executeCommand(command, "Publish build info for '$buildName:$buildNumber'")
+        executeCommand(
+            listOf("jfrog", "rt", "bp", buildName, buildNumber),
+            "Publish build info for '$buildName:$buildNumber'"
+        )
     }
 
-    private fun executeCommand(command: String, description: String) {
+    private fun executeCommand(command: List<String>, description: String) {
         log.info("$description: $command")
 
-        val process = ProcessBuilder(*command.split(" ").toTypedArray())
+        val process = ProcessBuilder(command)
             .inheritIO()
             .start()
 

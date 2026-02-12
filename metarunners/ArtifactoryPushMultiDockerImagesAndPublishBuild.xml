@@ -2,74 +2,24 @@
     <description>Create and publish Artifactory build and push multi docker images to it</description>
     <settings>
         <parameters>
-            <param name="DOCKER_REGISTRY" value="%DOCKER_REGISTRY%" />
-            <param name="ARTIFACTORY_DOCKER_IMAGES" value="%DISTRIBUTION_ARTIFACTS_COORDINATES_DOCKER%" />
-            <param name="ARTIFACTORY_DOCKER_BUILD_NUMBER" value="%BUILD_VERSION%" />
-            <param name="ARTIFACTORY_DOCKER_REPOSITORY" value="%DOCKER_REPO_DEV%" />
-            <param name="ARTIFACTORY_DOCKER_BUILD_NAME" value="%ARTIFACTORY_DOCKER_BUILD_NAME%" />
+            <param name="DOCKER_REGISTRY" value="%DOCKER_REGISTRY%"
+                   spec="text description='Docker registry URL' display='normal'" />
+            <param name="ARTIFACTORY_DOCKER_IMAGES" value="%DISTRIBUTION_ARTIFACTS_COORDINATES_DOCKER%"
+                   spec="text description='Docker images to push (comma/semicolon-separated list of image:tag)' display='normal'" />
+            <param name="ARTIFACTORY_DOCKER_REPOSITORY" value="%DOCKER_REPO_DEV%"
+                   spec="text description='Artifactory Docker repository name' display='normal'" />
+            <param name="ARTIFACTORY_DOCKER_BUILD_NAME" value="%ARTIFACTORY_DOCKER_BUILD_NAME%"
+                   spec="text description='Artifactory build name' display='normal'" />
+            <param name="ARTIFACTORY_DOCKER_BUILD_NUMBER" value="%BUILD_VERSION%"
+                   spec="text description='Artifactory build number/version' display='normal'" />
+            <param name="CONTAINER_ENGINE" value="%container.engine%"
+                   spec="text description='Container engine to use (docker/podman, or comma-separated list - prefers podman)' display='normal'" />
         </parameters>
         <build-runners>
-            <runner name="" type="kotlinScript">
+            <runner name="push multi docker images and publish build" type="OctopusArtifactoryAutomation">
                 <parameters>
-                    <param name="kotlinPath" value="%teamcity.tool.kotlin.compiler.1.5.32%" />
-                    <param name="scriptContent"><![CDATA[import java.util.concurrent.TimeUnit
-
-
-val dockerImages = "%ARTIFACTORY_DOCKER_IMAGES%"
-val dockerRegistry = "%DOCKER_REGISTRY%"
-val dockerRepository = "%ARTIFACTORY_DOCKER_REPOSITORY%"
-val buildName = "%ARTIFACTORY_DOCKER_BUILD_NAME%"
-val buildNumber = "%ARTIFACTORY_DOCKER_BUILD_NUMBER%"
-val containerEngineParam = "%container.engine%"
-
-// Normalize container engine: validate and prefer podman if multiple values
-val engine = containerEngineParam.split(",")
-    .map { it.trim().lowercase() }
-    .filter { it.isNotEmpty() }
-    .let { engines ->
-        val validEngines = engines.filter { it == "docker" || it == "podman" }
-
-        if (validEngines.isEmpty()) {
-            throw RuntimeException("Invalid container.engine value: '\$containerEngineParam'. Must contain 'docker' or 'podman'.")
-        }
-
-        // Prefer podman if present, otherwise use docker
-        if (validEngines.contains("podman")) "podman" else validEngines.first()
-    }
-
-println("Using container engine: \$engine")
-
-val dockerImagesList = dockerImages.split(",").map { it.trim() }
-
-for (dockerImage in dockerImagesList) {
-    val command = "jfrog rt \$engine-push \$dockerRegistry/\$dockerImage \$dockerRepository --build-name=\$buildName --build-number=\$buildNumber"
-    println("Executing: \$command")
-
-	val process = ProcessBuilder(*command.split(" ").toTypedArray())
-        .inheritIO()
-        .start()
-
-    val success = process.waitFor(10, TimeUnit.MINUTES)
-
-    if (!success || process.exitValue() != 0) {
-        throw RuntimeException("Command failed for \$dockerImage with exit code \${process.exitValue()} and message \${process.inputStream.bufferedReader().readText()}")
-    } else {
-        println("Successfully pushed \$dockerImage")
-    }
-
-}]]></param>
-                    <param name="scriptType" value="customScript" />
-                    <param name="teamcity.step.mode" value="default" />
-                </parameters>
-            </runner>
-            <runner name="Publish Artifactory Build" type="simpleRunner">
-                <parameters>
-                    <param name="org.jfrog.artifactory.selectedDeployableServer.downloadSpecSource" value="Job configuration" />
-                    <param name="org.jfrog.artifactory.selectedDeployableServer.uploadSpecSource" value="Job configuration" />
-                    <param name="org.jfrog.artifactory.selectedDeployableServer.useSpecs" value="false" />
-                    <param name="script.content"><![CDATA[jfrog rt bp %ARTIFACTORY_DOCKER_BUILD_NAME% %ARTIFACTORY_DOCKER_BUILD_NUMBER%]]></param>
-                    <param name="teamcity.step.mode" value="default" />
-                    <param name="use.custom.script" value="true" />
+                    <param name="ARGS"
+                           value="--token=%ARTIFACTORY_ACCESS_TOKEN% --url=%ARTIFACTORY_URL% --user=%ARTIFACTORY_USER% --password=%ARTIFACTORY_PASSWORD% push-multi-docker-images --docker-registry=%DOCKER_REGISTRY% --docker-images=%ARTIFACTORY_DOCKER_IMAGES% --docker-repository=%ARTIFACTORY_DOCKER_REPOSITORY% --build-name=%ARTIFACTORY_DOCKER_BUILD_NAME% --build-number=%ARTIFACTORY_DOCKER_BUILD_NUMBER% --container-engine=%CONTAINER_ENGINE%"/>
                 </parameters>
             </runner>
         </build-runners>

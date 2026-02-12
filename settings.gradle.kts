@@ -8,6 +8,7 @@ pluginManagement {
         id("com.avast.gradle.docker-compose") version ("0.16.9")
         id("io.github.gradle-nexus.publish-plugin") version ("1.1.0")
         id("org.octopusden.octopus.oc-template") version (extra["octopus-oc-template.version"] as String)
+        id("com.jfrog.artifactory") version ("5.2.5")
     }
 }
 

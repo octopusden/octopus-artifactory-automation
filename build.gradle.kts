@@ -12,6 +12,7 @@ plugins {
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin")
     id("org.octopusden.octopus.oc-template")
+    id("com.jfrog.artifactory")
     signing
 }
 
@@ -26,6 +27,25 @@ java.targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
+}
+
+artifactory {
+    publish {
+        val baseUrl = System.getenv("ARTIFACTORY_URL") ?: project.findProperty("artifactoryUrl") as String?
+        if (!baseUrl.isNullOrBlank()) {
+            contextUrl = "$baseUrl/artifactory"
+        }
+        repository {
+            repoKey = "rnd-maven-dev-local"
+            val repoUser = System.getenv("ARTIFACTORY_DEPLOYER_USERNAME") ?: project.findProperty("NEXUS_USER") as String?
+            val repoPassword = System.getenv("ARTIFACTORY_DEPLOYER_PASSWORD") ?: project.findProperty("NEXUS_PASSWORD") as String?
+            if (!repoUser.isNullOrBlank()) username = repoUser
+            if (!repoPassword.isNullOrBlank()) password = repoPassword
+        }
+        defaults {
+            publications("ALL_PUBLICATIONS")
+        }
+    }
 }
 
 ext {

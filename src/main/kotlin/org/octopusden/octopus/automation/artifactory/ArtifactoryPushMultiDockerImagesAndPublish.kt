@@ -37,7 +37,7 @@ class ArtifactoryPushMultiDockerImagesAndPublish : CliktCommand(name = COMMAND) 
 
     private val containerEngine by option(CONTAINER_ENGINE, help = "Container engine to use (docker/podman, or comma-separated list - prefers podman)")
         .convert { ContainerEngineNormalizer.normalize(it) }
-        .default(ContainerEngineNormalizer.DEFAULT_CONTAINER_ENGINE)
+        .required()
 
     private val log by lazy { context[ArtifactoryCommand.LOG] as Logger }
 

@@ -7,6 +7,7 @@ const val SPLIT_SYMBOLS = "[,;]"
 fun main(args: Array<String>) {
     ArtifactoryCommand().subcommands(
         ArtifactoryPromoteBuild(),
-        ArtifactoryPromoteDockerImages()
+        ArtifactoryPromoteDockerImages(),
+        ArtifactoryPushMultiDockerImagesAndPublish()
     ).main(args)
 }

@@ -1,8 +1,8 @@
 import com.avast.gradle.dockercompose.ComposeExtension
-import java.time.Duration
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.octopusden.octopus.task.ConfigureMockServer
+import java.time.Duration
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -12,11 +12,23 @@ plugins {
     `maven-publish`
     id("io.github.gradle-nexus.publish-plugin")
     id("org.octopusden.octopus.oc-template")
+    id("io.gitlab.arturbosch.detekt")
+    id("org.jlleitschuh.gradle.ktlint")
+    id("org.octopusden.octopus-quality")
     signing
 }
 
 group = "org.octopusden.octopus.automation.artifactory"
 description = "Octopus Artifactory Automation"
+
+octopusQuality {
+    coverage {
+        enabled.set(false)
+    }
+    kotlin {
+        failOnViolation.set(true)
+    }
+}
 
 kotlin {
     compilerOptions.jvmTarget.set(JvmTarget.JVM_1_8)
@@ -33,7 +45,10 @@ ext {
         set("signingRequired", it.containsKey("ORG_GRADLE_PROJECT_signingKey") && it.containsKey("ORG_GRADLE_PROJECT_signingPassword"))
         set("testPlatform", it.getOrDefault("TEST_PLATFORM", properties["test.platform"]))
         set("dockerRegistry", it.getOrDefault("DOCKER_REGISTRY", properties["docker.registry"]))
-        set("octopusGithubDockerRegistry", it.getOrDefault("OCTOPUS_GITHUB_DOCKER_REGISTRY", project.properties["octopus.github.docker.registry"]))
+        set(
+            "octopusGithubDockerRegistry",
+            it.getOrDefault("OCTOPUS_GITHUB_DOCKER_REGISTRY", project.properties["octopus.github.docker.registry"]),
+        )
         set("okdActiveDeadlineSeconds", it.getOrDefault("OKD_ACTIVE_DEADLINE_SECONDS", properties["okd.active-deadline-seconds"]))
         set("okdProject", it.getOrDefault("OKD_PROJECT", properties["okd.project"]))
         set("okdClusterDomain", it.getOrDefault("OKD_CLUSTER_DOMAIN", properties["okd.cluster-domain"]))
@@ -43,7 +58,9 @@ ext {
 }
 val supportedTestPlatforms = listOf("docker", "okd")
 if (project.ext["testPlatform"] !in supportedTestPlatforms) {
-    throw IllegalArgumentException("Test platform must be set to one of the following $supportedTestPlatforms. Start gradle build with -Ptest.platform=... or set env variable TEST_PLATFORM")
+    throw IllegalArgumentException(
+        "Test platform must be set to one of the following $supportedTestPlatforms. Start gradle build with -Ptest.platform=... or set env variable TEST_PLATFORM",
+    )
 }
 val mandatoryProperties = mutableListOf("dockerRegistry", "octopusGithubDockerRegistry")
 if (project.ext["testPlatform"] == "okd") {
@@ -51,17 +68,22 @@ if (project.ext["testPlatform"] == "okd") {
     mandatoryProperties.add("okdProject")
     mandatoryProperties.add("okdClusterDomain")
 }
+
 fun String.getExt() = project.ext[this].toString()
 
 configure<ComposeExtension> {
-    useComposeFiles.add(layout.projectDirectory.file("docker/docker-compose.yml").asFile.path)
+    useComposeFiles.add(
+        layout.projectDirectory
+            .file("docker/docker-compose.yml")
+            .asFile.path,
+    )
     waitForTcpPorts.set(true)
     captureContainersOutputToFiles.set(layout.buildDirectory.dir("docker-logs"))
     environment.putAll(
         mapOf(
             "DOCKER_REGISTRY" to "dockerRegistry".getExt(),
             "MOCK_SERVER_VERSION" to "mockServerVersion".getExt(),
-        )
+        ),
     )
 }
 
@@ -71,17 +93,19 @@ ocTemplate {
     namespace.set("okdProject".getExt())
     prefix.set("art-auto")
 
-    "okdWebConsoleUrl".getExt().takeIf { it.isNotBlank() }?.let{
+    "okdWebConsoleUrl".getExt().takeIf { it.isNotBlank() }?.let {
         webConsoleUrl.set(it)
     }
 
     service("mockserver") {
         templateFile.set(rootProject.layout.projectDirectory.file("okd/mockserver.yaml"))
-        parameters.set(mapOf(
-            "DOCKER_REGISTRY" to "dockerRegistry".getExt(),
-            "ACTIVE_DEADLINE_SECONDS" to "okdActiveDeadlineSeconds".getExt(),
-            "MOCK_SERVER_VERSION" to "mockServerVersion".getExt()
-        ))
+        parameters.set(
+            mapOf(
+                "DOCKER_REGISTRY" to "dockerRegistry".getExt(),
+                "ACTIVE_DEADLINE_SECONDS" to "okdActiveDeadlineSeconds".getExt(),
+                "MOCK_SERVER_VERSION" to "mockServerVersion".getExt(),
+            ),
+        )
     }
 }
 
@@ -106,7 +130,7 @@ when ("testPlatform".getExt()) {
             }
             val jar = tasks.shadowJar.flatMap { it.archiveFile }.also { inputs.file(it) }
             systemProperties["jar"] = jar.get().asFile.absolutePath
-            finalizedBy( "ocLogs", "ocDelete")
+            finalizedBy("ocLogs", "ocDelete")
         }
     }
     "docker" -> {
@@ -170,7 +194,10 @@ configurations {
 
 val metarunners = artifacts.add(
     "distributions",
-    layout.buildDirectory.file("distributions/metarunners.zip").get().asFile
+    layout.buildDirectory
+        .file("distributions/metarunners.zip")
+        .get()
+        .asFile,
 ) {
     classifier = "metarunners"
     type = "zip"

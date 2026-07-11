@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>TooGenericExceptionThrown:ApplicationTest.kt$ApplicationTest.Companion$throw Exception("System property 'test.mockserver-host' must be defined")</ID>
+    <ID>TooGenericExceptionThrown:ApplicationTest.kt$ApplicationTest.Companion$throw Exception("System property 'test.mockserver-port' must be defined")</ID>
+    <ID>TooGenericExceptionThrown:ArtifactoryPushMultiDockerImagesAndPublish.kt$ArtifactoryPushMultiDockerImagesAndPublish$throw RuntimeException("$description failed with exit code ${process.exitValue()}")</ID>
+    <ID>TooGenericExceptionThrown:ArtifactoryPushMultiDockerImagesAndPublish.kt$ArtifactoryPushMultiDockerImagesAndPublish$throw RuntimeException("$description timed out after $DEFAULT_TIMEOUT_MINUTES minutes")</ID>
+    <ID>UnusedPrivateMember:ApplicationTest.kt$ApplicationTest.Companion$@JvmStatic private fun commands(): Stream&lt;Arguments></ID>
+    <ID>UnusedPrivateMember:ContainerEngineNormalizerTest.kt$ContainerEngineNormalizerTest.Companion$@JvmStatic private fun validEngineInputs(): Stream&lt;Arguments></ID>
+    <ID>UnusedPrivateProperty:ArtifactoryCommand.kt$ArtifactoryCommand.Companion$private const val AUTH_NO_CREDENTIAL_ERROR_MESSAGE = "Either username/password or token must be set"</ID>
+    <ID>UseCheckOrError:ApplicationTest.kt$ApplicationTest$throw IllegalStateException("System property 'jar' must be provided")</ID>
+    <ID>UseCheckOrError:ArtifactoryCommand.kt$ArtifactoryCommand$throw IllegalStateException("Artifactory user not found")</ID>
+    <ID>UseRequire:ContainerEngineNormalizer.kt$ContainerEngineNormalizer$throw IllegalArgumentException( "Invalid container.engine value: '$containerEngineParam'. Must contain '$DOCKER' or '$PODMAN'.", )</ID>
+  </CurrentIssues>
+</SmellBaseline>

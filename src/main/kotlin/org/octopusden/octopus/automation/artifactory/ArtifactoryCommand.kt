@@ -16,9 +16,12 @@ import org.octopusden.octopus.infrastructure.client.commons.StandardBearerTokenC
 import org.slf4j.LoggerFactory
 
 class ArtifactoryCommand : CliktCommand(name = "") {
-    private val url by option(URL_OPTION, help = "Artifactory URL").convert { it.trim() }.required()
+    private val url by option(URL_OPTION, help = "Artifactory URL")
+        .convert { it.trim() }
+        .required()
         .check("$URL_OPTION is empty") { it.isNotEmpty() }
-    private val user by option(USER_OPTION, help = "Artifactory user").convert { it.trim() }
+    private val user by option(USER_OPTION, help = "Artifactory user")
+        .convert { it.trim() }
         .check("$USER_OPTION is empty") {
             !token.isNullOrBlank() || !it.isNullOrBlank()
         }
@@ -35,13 +38,16 @@ class ArtifactoryCommand : CliktCommand(name = "") {
         val log = LoggerFactory.getLogger(ArtifactoryCommand::class.java.`package`.name)
         val client: ArtifactoryClient = ArtifactoryClassicClient(object : ClientParametersProvider {
             override fun getApiUrl() = url
+
             override fun getAuth(): CredentialProvider =
                 token?.takeIf { it.isNotBlank() }?.let { t -> StandardBearerTokenCredentialProvider(t) }
                     ?: user?.let { u -> password?.let { p -> StandardBasicCredCredentialProvider(u, p) } }
                     ?: throw IllegalArgumentException("Artifactory credentials not found")
         })
 
-        val resultUser = token?.takeIf { it.isNotBlank() }?.let { client.getTokens().tokens.map { t -> t.subject.substringAfterLast("/") } }
+        val resultUser = token
+            ?.takeIf { it.isNotBlank() }
+            ?.let { client.getTokens().tokens.map { t -> t.subject.substringAfterLast("/") } }
             ?.firstOrNull { it.isNotBlank() }
             ?: user
             ?: throw IllegalStateException("Artifactory user not found")

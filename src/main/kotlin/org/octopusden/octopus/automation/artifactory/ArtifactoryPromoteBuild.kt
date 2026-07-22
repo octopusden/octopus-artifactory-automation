@@ -16,25 +16,31 @@ class ArtifactoryPromoteBuild : CliktCommand(name = COMMAND) {
     private val context by requireObject<MutableMap<String, Any>>()
 
     private val buildName by option(BUILD_NAME, help = "Artifactory build name")
-        .convert { it.trim() }.required()
+        .convert { it.trim() }
+        .required()
         .check("$BUILD_NAME is empty") { it.isNotEmpty() }
 
     private val buildNumber by option(BUILD_NUMBER, help = "Artifactory build version")
-        .convert { it.trim() }.required()
+        .convert { it.trim() }
+        .required()
         .check("$BUILD_NUMBER is empty") { it.isNotEmpty() }
 
     private val targetRepository by option(TARGET_REPOSITORY, help = "Target Artifactory repository")
-        .convert { it.trim() }.required()
+        .convert { it.trim() }
+        .required()
         .check("$TARGET_REPOSITORY is empty") { it.isNotEmpty() }
 
     private val targetStatus by option(TARGET_STATUS, help = "Target promotion status (e.g. 'release')")
-        .convert { it.trim() }.required()
+        .convert { it.trim() }
+        .required()
         .check("$TARGET_STATUS is empty") { it.isNotEmpty() }
 
     private val ignoreNotFound by option(IGNORE_NOT_FOUND, help = "Ignore errors when build is not found")
-        .convert { it.trim().toBoolean() }.default(true)
+        .convert { it.trim().toBoolean() }
+        .default(true)
 
-    private val force by option(FORCE, help = "Force promotion").convert { it.trim().toBoolean() }
+    private val force by option(FORCE, help = "Force promotion")
+        .convert { it.trim().toBoolean() }
         .default(false)
 
     private val client by lazy { context[ArtifactoryCommand.CLIENT] as ArtifactoryClient }
@@ -50,7 +56,9 @@ class ArtifactoryPromoteBuild : CliktCommand(name = COMMAND) {
             if (ignoreNotFound) {
                 log.info("Artifactory build '$build' is not found")
                 return
-            } else throw e
+            } else {
+                throw e
+            }
         }
         if (buildInfo.modules.isNullOrEmpty()) {
             log.warn("Artifactory build '$build' is empty (has no modules)")

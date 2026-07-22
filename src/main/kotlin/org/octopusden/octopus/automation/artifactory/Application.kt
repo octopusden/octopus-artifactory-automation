@@ -5,9 +5,10 @@ import com.github.ajalt.clikt.core.subcommands
 const val SPLIT_SYMBOLS = "[,;]"
 
 fun main(args: Array<String>) {
-    ArtifactoryCommand().subcommands(
-        ArtifactoryPromoteBuild(),
-        ArtifactoryPromoteDockerImages(),
-        ArtifactoryPushMultiDockerImagesAndPublish()
-    ).main(args)
+    ArtifactoryCommand()
+        .subcommands(
+            ArtifactoryPromoteBuild(),
+            ArtifactoryPromoteDockerImages(),
+            ArtifactoryPushMultiDockerImagesAndPublish(),
+        ).main(args)
 }

@@ -1,0 +1,19 @@
+name: Quality Gates
+
+on:
+  push:
+    branches: [main]
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  quality-gates:
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-quality-gates.yml@v2.4.1
+    with:
+      java-version: '21'
+      # Coverage is disabled for this repo (octopusQuality { coverage { enabled = false } }),
+      # so qualityCoverage is a no-op. The default coverage-command still pulls in `test`,
+      # which is wired to docker-compose/OKD infra (composeBuild -> docker-compose) that
+      # cannot run on the GitHub runner. Exclude `test` to drop that whole infra chain.
+      coverage-command: ./gradlew qualityCoverage --no-daemon --stacktrace -x test
+    secrets: inherit

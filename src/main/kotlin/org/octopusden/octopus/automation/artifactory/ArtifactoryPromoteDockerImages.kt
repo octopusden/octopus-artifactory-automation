@@ -16,23 +16,36 @@ class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
     private val context by requireObject<MutableMap<String, Any>>()
 
     private val sourceRepositories by option(
-        SOURCE_REPOSITORY, help = "Source Artifactory repositories (separated by comma/semicolon)"
+        SOURCE_REPOSITORY,
+        help = "Source Artifactory repositories (separated by comma/semicolon)",
     ).convert { sources ->
-        sources.split(SPLIT_SYMBOLS.toRegex()).map { it.trim() }.filter { it.isNotEmpty() }.toSet()
-    }.required().check("$SOURCE_REPOSITORY is empty") { it.isNotEmpty() }
+        sources
+            .split(SPLIT_SYMBOLS.toRegex())
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .toSet()
+    }.required()
+        .check("$SOURCE_REPOSITORY is empty") { it.isNotEmpty() }
 
     private val targetRepository by option(
-        TARGET_REPOSITORY, help = "Target Artifactory repository"
+        TARGET_REPOSITORY,
+        help = "Target Artifactory repository",
     ).convert { it.trim() }.required().check("$TARGET_REPOSITORY is empty") { it.isNotEmpty() }
 
     private val images by option(
-        IMAGES, help = "Docker images coordinates in PATH:TAG format (separated by comma/semicolon)"
+        IMAGES,
+        help = "Docker images coordinates in PATH:TAG format (separated by comma/semicolon)",
     ).convert { imagesValue ->
-        imagesValue.split(SPLIT_SYMBOLS.toRegex()).map { it.trim() }.filter { it.isNotEmpty() }.toSet()
+        imagesValue
+            .split(SPLIT_SYMBOLS.toRegex())
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .toSet()
     }.required()
 
     private val ignoreNotFound by option(
-        IGNORE_NOT_FOUND, help = "Ignore errors when docker image is not found"
+        IGNORE_NOT_FOUND,
+        help = "Ignore errors when docker image is not found",
     ).convert { it.trim().toBoolean() }.default(false)
 
     private val client by lazy { context[ArtifactoryCommand.CLIENT] as ArtifactoryClient }
@@ -53,7 +66,7 @@ class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
             try {
                 client.promoteDockerImage(
                     sourceRepository,
-                    PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository)
+                    PromoteDockerImageRequest(coordinates[0], coordinates[1], targetRepository),
                 )
                 log.info("Docker image '$image' promoted from '$sourceRepository' to '$targetRepository'")
                 return
@@ -61,8 +74,11 @@ class ArtifactoryPromoteDockerImages : CliktCommand(name = COMMAND) {
             }
         }
         with("Docker image '$image' is not found in repositories $sourceRepositories") {
-            if (ignoreNotFound) log.info(this)
-            else throw NotFoundException(this)
+            if (ignoreNotFound) {
+                log.info(this)
+            } else {
+                throw NotFoundException(this)
+            }
         }
     }
 

@@ -6,10 +6,25 @@ on:
 
 jobs:
   build:
-    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@v2.4.1
+    uses: octopusden/octopus-base/.github/workflows/common-java-gradle-release.yml@v2.7.0
     with:
       flow-type: hybrid
       java-version: '21'
       commit-hash: ${{ github.event.client_payload.commit }}
       build-version: ${{ github.event.client_payload.project_version }}
+      # Exempt from the Maven Central publication guard that v2.6.x adds. This repository
+      # publishes one coordinate, and its -all.jar (~19.5 MB) trips the guard twice — on the
+      # shadow classifier and on the 8 MB size limit. It must keep publishing because the
+      # metarunners this repository itself ships download it from a Maven repository and run
+      # it: the published metarunners.zip resolves
+      #   ${group}:octopus-artifactory-automation:${version}:jar:all
+      # and then executes `java -jar …-all.jar` (metarunners/OctopusArtifactoryAutomation.xml,
+      # with the coordinate substituted at build time by the zipMetarunners task). Three of the
+      # five metarunners (promote build, promote docker images, push multi docker images and
+      # publish build) run through that one, so dropping the classifier would break them.
+      #
+      # max-central-artifact-mb is deliberately left at its default rather than raised: the
+      # thin jar and the sources/javadoc artifacts are all far below it, so raising the limit
+      # would weaken the guard for them to accommodate this one artifact.
+      fat-jar-publication-allowlist: octopus-artifactory-automation
     secrets: inherit

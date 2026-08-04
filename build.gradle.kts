@@ -22,6 +22,18 @@ group = "org.octopusden.octopus.automation.artifactory"
 description = "Octopus Artifactory Automation"
 
 octopusQuality {
+    // Regression guard on what this repository publishes to Maven Central, from octopus-base
+    // v2.7.0. This repository never had a hand-rolled version of this guard, so this is a pure
+    // addition, not a replacement.
+    publication {
+        enforceCentralPublications.set(true)
+        centralPublications.set(
+            setOf(
+                ":|maven|org.octopusden.octopus.automation.artifactory:octopus-artifactory-automation|" +
+                    "[jar, jar:all, jar:javadoc, jar:sources, zip:metarunners]",
+            ),
+        )
+    }
     coverage {
         enabled.set(false)
     }

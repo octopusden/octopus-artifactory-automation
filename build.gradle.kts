@@ -22,9 +22,9 @@ group = "org.octopusden.octopus.automation.artifactory"
 description = "Octopus Artifactory Automation"
 
 octopusQuality {
-    // Regression guard on what this repository publishes to Maven Central, from octopus-base
-    // v2.7.0. This repository never had a hand-rolled version of this guard, so this is a pure
-    // addition, not a replacement.
+    // Regression guard on what this repository publishes. It compares the publications the build
+    // DECLARES, so the routed one is still listed: the release-time guard no longer sees it, and
+    // this is what watches its shape.
     publication {
         enforceCentralPublications.set(true)
         centralPublications.set(
@@ -256,6 +256,17 @@ publishing {
                         name.set("octopus")
                     }
                 }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/octopusden/octopus-artifactory-automation")
+            credentials {
+                username = System.getenv("GITHUB_PACKAGES_USERNAME")
+                password = System.getenv("GITHUB_PACKAGES_TOKEN")
             }
         }
     }

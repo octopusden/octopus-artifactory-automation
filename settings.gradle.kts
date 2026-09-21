@@ -4,6 +4,7 @@ import java.util.zip.CRC32
 pluginManagement {
     val detektVersion: String by settings
     val ktlintGradleVersion: String by settings
+    val sonarqubeVersion: String by settings
 
     plugins {
         id("org.jetbrains.kotlin.jvm") version ("2.0.21")
@@ -14,6 +15,7 @@ pluginManagement {
         id("io.gitlab.arturbosch.detekt") version detektVersion
         id("org.jlleitschuh.gradle.ktlint") version ktlintGradleVersion
         id("org.octopusden.octopus-quality") version (extra["octopus-quality.version"] as String)
+        id("org.sonarqube") version sonarqubeVersion
     }
 
     repositories {

@@ -103,6 +103,18 @@ class ApplicationTest {
                     ),
                 ),
                 Arguments.of(
+                    "Test promote-build with a module without artifacts",
+                    0,
+                    arrayOf(
+                        ArtifactoryPromoteBuild.COMMAND,
+                        "${ArtifactoryPromoteBuild.BUILD_NAME}=existed-build-name",
+                        "${ArtifactoryPromoteBuild.BUILD_NUMBER}=existed-build-number2",
+                        "${ArtifactoryPromoteBuild.TARGET_REPOSITORY}=release",
+                        "${ArtifactoryPromoteBuild.TARGET_STATUS}=release",
+                        "${ArtifactoryPromoteBuild.IGNORE_NOT_FOUND}=false",
+                    ),
+                ),
+                Arguments.of(
                     "Test promote-build with not existed build",
                     1,
                     arrayOf(

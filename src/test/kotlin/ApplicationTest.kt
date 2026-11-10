@@ -1,5 +1,4 @@
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
@@ -48,9 +47,14 @@ class ApplicationTest {
      * A module without artifacts must not stop the promotion: the promote request is sent once,
      * with the requested target repository and status
      */
-    @Test
-    fun promoteBuildWithModuleWithoutArtifactsSendsPromotion() {
-        val promoteRequest = HttpRequest.request()
+    @ParameterizedTest
+    @MethodSource("authentications")
+    fun promoteBuildWithModuleWithoutArtifactsSendsPromotion(
+        authentication: String,
+        options: Array<String>,
+    ) {
+        val promoteRequest = HttpRequest
+            .request()
             .withMethod("POST")
             .withPath("/artifactory/api/build/promote/existed-build-name/existed-build-number2")
         // not closed: MockServerClient.close() would stop the shared mock server
@@ -59,8 +63,8 @@ class ApplicationTest {
         Assertions.assertEquals(
             0,
             execute(
-                "Test promote-build with a module without artifacts sends the promotion",
-                *ARTIFACTORY_OPTIONS,
+                "Test promote-build with a module without artifacts sends the promotion ($authentication)",
+                *options,
                 ArtifactoryPromoteBuild.COMMAND,
                 "${ArtifactoryPromoteBuild.BUILD_NAME}=existed-build-name",
                 "${ArtifactoryPromoteBuild.BUILD_NUMBER}=existed-build-number2",
@@ -118,6 +122,13 @@ class ApplicationTest {
             "${ArtifactoryCommand.URL_OPTION}=$ARTIFACTORY_URL",
             "${ArtifactoryCommand.USER_OPTION}=$ARTIFACTORY_USER",
         )
+
+        @JvmStatic
+        fun authentications(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of("basic", ARTIFACTORY_OPTIONS),
+                Arguments.of("token", ARTIFACTORY_OPTIONS_WITH_TOKEN),
+            )
 
         // <editor-fold defaultstate="collapsed" desc="Test Data">
         @JvmStatic

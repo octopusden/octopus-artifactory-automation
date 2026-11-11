@@ -2,6 +2,12 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import org.mockserver.client.MockServerClient
+import org.mockserver.matchers.MatchType
+import org.mockserver.model.ClearType
+import org.mockserver.model.HttpRequest
+import org.mockserver.model.JsonBody
+import org.mockserver.verify.VerificationTimes
 import org.octopusden.octopus.automation.artifactory.ArtifactoryCommand
 import org.octopusden.octopus.automation.artifactory.ArtifactoryPromoteBuild
 import org.octopusden.octopus.automation.artifactory.ArtifactoryPromoteDockerImages
@@ -35,6 +41,47 @@ class ApplicationTest {
         command: Array<String>,
     ) {
         Assertions.assertEquals(expectedExitCode, execute(name, *ARTIFACTORY_OPTIONS_WITH_TOKEN, *command))
+    }
+
+    /**
+     * A module without artifacts must not stop the promotion: the promote request is sent once,
+     * with the requested target repository and status
+     */
+    @ParameterizedTest
+    @MethodSource("authentications")
+    fun promoteBuildWithModuleWithoutArtifactsSendsPromotion(
+        authentication: String,
+        options: Array<String>,
+    ) {
+        val promoteRequest = HttpRequest
+            .request()
+            .withMethod("POST")
+            .withPath("/artifactory/api/build/promote/existed-build-name/existed-build-number2")
+        // not closed: MockServerClient.close() would stop the shared mock server
+        val mockServerClient = MockServerClient(mockserverHost, mockserverPort.toInt())
+        mockServerClient.clear(promoteRequest, ClearType.LOG)
+        Assertions.assertEquals(
+            0,
+            execute(
+                "Test promote-build with a module without artifacts sends the promotion ($authentication)",
+                *options,
+                ArtifactoryPromoteBuild.COMMAND,
+                "${ArtifactoryPromoteBuild.BUILD_NAME}=existed-build-name",
+                "${ArtifactoryPromoteBuild.BUILD_NUMBER}=existed-build-number2",
+                "${ArtifactoryPromoteBuild.TARGET_REPOSITORY}=module-without-artifacts-target",
+                "${ArtifactoryPromoteBuild.TARGET_STATUS}=release",
+                "${ArtifactoryPromoteBuild.IGNORE_NOT_FOUND}=false",
+            ),
+        )
+        mockServerClient.verify(
+            promoteRequest.withBody(
+                JsonBody.json(
+                    """{"targetRepo": "module-without-artifacts-target", "status": "release"}""",
+                    MatchType.ONLY_MATCHING_FIELDS,
+                ),
+            ),
+            VerificationTimes.exactly(1),
+        )
     }
 
     private fun execute(
@@ -76,6 +123,13 @@ class ApplicationTest {
             "${ArtifactoryCommand.USER_OPTION}=$ARTIFACTORY_USER",
         )
 
+        @JvmStatic
+        fun authentications(): Stream<Arguments> =
+            Stream.of(
+                Arguments.of("basic", ARTIFACTORY_OPTIONS),
+                Arguments.of("token", ARTIFACTORY_OPTIONS_WITH_TOKEN),
+            )
+
         // <editor-fold defaultstate="collapsed" desc="Test Data">
         @JvmStatic
         private fun commands(): Stream<Arguments> =
@@ -97,6 +151,18 @@ class ApplicationTest {
                         ArtifactoryPromoteBuild.COMMAND,
                         "${ArtifactoryPromoteBuild.BUILD_NAME}=existed-build-name",
                         "${ArtifactoryPromoteBuild.BUILD_NUMBER}=existed-build-number1",
+                        "${ArtifactoryPromoteBuild.TARGET_REPOSITORY}=release",
+                        "${ArtifactoryPromoteBuild.TARGET_STATUS}=release",
+                        "${ArtifactoryPromoteBuild.IGNORE_NOT_FOUND}=false",
+                    ),
+                ),
+                Arguments.of(
+                    "Test promote-build with a module without artifacts",
+                    0,
+                    arrayOf(
+                        ArtifactoryPromoteBuild.COMMAND,
+                        "${ArtifactoryPromoteBuild.BUILD_NAME}=existed-build-name",
+                        "${ArtifactoryPromoteBuild.BUILD_NUMBER}=existed-build-number2",
                         "${ArtifactoryPromoteBuild.TARGET_REPOSITORY}=release",
                         "${ArtifactoryPromoteBuild.TARGET_STATUS}=release",
                         "${ArtifactoryPromoteBuild.IGNORE_NOT_FOUND}=false",
